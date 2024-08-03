@@ -18,7 +18,10 @@ class Shader
 
         // Make this into a map where all locations are stored:
         // std::map<std::string, GLuint> locations;
-        GLuint transformLoc;
+        GLuint modelLoc;
+        GLuint viewLoc;
+        GLuint projectionLoc;
+
 
         // Methods
         Shader();

@@ -65,11 +65,12 @@ void Client::init(){
 	// Specify the viewport of OpenGL in the Window
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
 	glViewport(0, 0, window_width, window_height);
-    playerShader = new Shader("resources/shaders/default.vert", "resources/shaders/default.frag");
-    player = new Player(playerShader);
-
     // Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
+    // Init player shader
+    playerShader = new Shader("resources/shaders/default.vert", "resources/shaders/default.frag");
+    
+    player = new Player(playerShader);
 }
 
 // Start the client game loop.
@@ -97,9 +98,7 @@ void Client::renderPlayers(){
             x.second->init();
             x.second->setInitialised(true);
         }
-        // Print the player's position
-        x.second->draw();
-        // x.second->update();
+        x.second->draw(window_width, window_height);
     }
 }
 
@@ -150,7 +149,7 @@ void Client::render() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     player->keyboard_input(window);
-    player->draw();
+    player->draw(window_width, window_height);
 
     renderPlayers();
 

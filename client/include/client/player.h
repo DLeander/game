@@ -40,7 +40,7 @@ class Player {
         Player(Shader* shader, playerInfo info);
         ~Player();
         void init();
-        void draw();
+        void draw(int width, int height);
         void keyboard_input(GLFWwindow* window);
         void mouse_input(GLFWwindow* window);
         bool isInitialised() { return initialised; };
@@ -48,5 +48,9 @@ class Player {
     private:
         // Variables
         bool initialised;
+        int indices_size;
+        glm::mat4 model;
+        glm::mat4 view;
+        glm::mat4 projection;
         // Methods
 };

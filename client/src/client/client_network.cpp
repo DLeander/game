@@ -23,7 +23,7 @@ boost::uuids::uuid ClientNetwork::connect() {
     // Initialize connection to server
     client_socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (client_socket < 0) {
-        perror("Failed to create socket");
+        perror("Failed to create socket"); 
         return boost::uuids::nil_uuid();
     }
 

@@ -48,7 +48,9 @@ Shader::Shader(const char* vertexFile, const char* fragmentFile){
 
 void Shader::Activate(){
     glUseProgram(ID);
-    transformLoc = glGetUniformLocation(ID, "transform");
+    modelLoc = glGetUniformLocation(ID, "model");
+    viewLoc = glGetUniformLocation(ID, "view");
+    projectionLoc = glGetUniformLocation(ID, "projection");
 }
 
 void Shader::Delete(){
