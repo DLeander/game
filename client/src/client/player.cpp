@@ -25,6 +25,8 @@ Player::~Player() {
     // Delete the player's shader
     playerShader->Delete();
     delete playerShader;
+
+    playerTexture->Delete();
 }
 
 void Player::init() {
@@ -45,38 +47,43 @@ void Player::init() {
     // };
 
     GLfloat vertices[] = {
-        // Positions            // Colors
-        // Front face
-        -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        // Back face
-        -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        // Left face
-        -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        // Right face
-        0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        // Top face
-        -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        // Bottom face
-        -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,
-        -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,
-        0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f
-    };
+    // Positions            // Colors           // Texture Coords
+    // Front face
+    -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+     0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+     0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+    -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+
+    // Back face
+    -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+     0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+     0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+    -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+
+    // Left face
+    -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+    -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+    -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+    -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+
+    // Right face
+     0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+     0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+     0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+     0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+
+    // Top face
+    -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+    -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+     0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+     0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+
+    // Bottom face
+    -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+    -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+     0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+     0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f
+};
 
     GLuint indices[] = {
         // Front face
@@ -111,21 +118,29 @@ void Player::init() {
 	playerEBO = new EBO(indices, sizeof(indices));
 
     // Links VBO attributes such as coordinates and colors to VAO
-	playerVAO->LinkAttrib(*playerVBO, 0, 3, GL_FLOAT, 6 * sizeof(float), (void*)0);
-	playerVAO->LinkAttrib(*playerVBO, 1, 3, GL_FLOAT, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	playerVAO->LinkAttrib(*playerVBO, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+	playerVAO->LinkAttrib(*playerVBO, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    playerVAO->LinkAttrib(*playerVBO, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     // Unbind all to prevent accidentally modifying them
     playerVAO->Unbind();
     playerVBO->Unbind();
     playerEBO->Unbind();
 
-    // Init model, view, and projection matrices
-    model = glm::mat4(1.0f);
-    view = glm::mat4(1.0f);
-    projection = glm::mat4(1.0f);
+    // Load the player's texture
+    playerTexture = new Texture("resources/textures/player/mulah.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    playerShader->Activate();
+    playerTexture->textureUnit(playerShader, "texture1", 0);
 }
 
 void Player::draw(int width, int height) {
     // transform = glm::translate(transform, position);
+
+    // Init model, view, and projection matrices
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = glm::mat4(1.0f);
+    glm::mat4 projection = glm::mat4(1.0f);
+
+    model = glm::translate(model, position); // Apply translation based on the position vector to move 3d object.
     view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
     projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
     playerShader->Activate();
@@ -133,7 +148,8 @@ void Player::draw(int width, int height) {
     glUniformMatrix4fv(playerShader->modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(playerShader->viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(playerShader->projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-    
+
+    playerTexture->Bind();
 
     playerVAO->Bind();
     glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, 0);

@@ -71,6 +71,8 @@ void Client::init(){
     playerShader = new Shader("resources/shaders/default.vert", "resources/shaders/default.frag");
     
     player = new Player(playerShader);
+
+    camera = new Camera(window_width, window_height, glm::vec3(0.0f, 0.0f, 2.0f));
 }
 
 // Start the client game loop.
@@ -78,7 +80,10 @@ void Client::loop(){
     // Main game loop
 	while (!glfwWindowShouldClose(window))
 	{
-        // Render the client
+        // Set up the client camera
+        camera->matrix(45.0f, 0.1f, 100.0f, playerShader, "projection");
+
+        // Render the world and players
         // world();
         render();
 

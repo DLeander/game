@@ -31,6 +31,7 @@
 #include "player.h"
 #include "common.h"
 #include "client_network.h"
+#include "camera.h"
 
 namespace std {
     template <>
@@ -67,6 +68,7 @@ class Client{
         boost::uuids::uuid clientID;
         Player* player;
         std::unordered_map<boost::uuids::uuid, Player*> otherPlayers;
+        Camera* camera;
 
         // Methods
         void init();

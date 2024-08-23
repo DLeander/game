@@ -51,6 +51,9 @@ void Shader::Activate(){
     modelLoc = glGetUniformLocation(ID, "model");
     viewLoc = glGetUniformLocation(ID, "view");
     projectionLoc = glGetUniformLocation(ID, "projection");
+
+    // Textures
+    textureLoc = glGetUniformLocation(ID, "texture1");
 }
 
 void Shader::Delete(){

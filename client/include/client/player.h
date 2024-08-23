@@ -17,6 +17,7 @@
 #include "objects/VAO.h"
 #include "objects/VBO.h"
 #include "objects/EBO.h"
+#include "texture/texture.h"
 
 struct playerInfo{
     glm::vec3 position;
@@ -49,8 +50,8 @@ class Player {
         // Variables
         bool initialised;
         int indices_size;
-        glm::mat4 model;
-        glm::mat4 view;
-        glm::mat4 projection;
+
+        Texture* playerTexture;
+
         // Methods
 };

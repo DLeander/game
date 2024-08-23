@@ -21,6 +21,7 @@ class Shader
         GLuint modelLoc;
         GLuint viewLoc;
         GLuint projectionLoc;
+        GLuint textureLoc;
 
 
         // Methods
