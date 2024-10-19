@@ -2,13 +2,15 @@
 
 Player::Player(Shader* shader) {
     // Initialize the player's position
+    model = glm::mat4(1.0f);
+    position = glm::vec3(0.0f, 0.0f, 0.0f);
     playerShader = shader;
     init();
     initialised = true;
 }
 
-Player::Player(Shader* shader, playerInfo info){
-    position = info.position;
+Player::Player(Shader* shader, glm::mat4 model){
+    model = model;
     playerShader = shader;
     initialised = false;
 }
@@ -32,58 +34,44 @@ Player::~Player() {
 void Player::init() {
     speed = 0.01f;
     position = glm::vec3(0.0f, 0.0f, 0.0f);
-    // Render the clients player
-    // GLfloat vertices[] = {
-    //     // Cordiantes           // Colors
-    //     -0.2f, -0.2f, 0.0f,     1.0f, 1.0f, 1.0f,
-    //     -0.2f, 0.2f, 0.0f,      1.0f, 1.0f, 1.0f,
-    //     0.2f, 0.2f, 0.0f,       1.0f, 1.0f, 1.0f,
-    //     0.2f, -0.2f, 0.0f,      1.0f, 1.0f, 1.0f
-    // };
-
-    // GLuint indices[] = {
-    //     0, 1, 3,
-    //     1, 2, 3
-    // };
-
     GLfloat vertices[] = {
-    // Positions            // Colors           // Texture Coords
-    // Front face
-    -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
-     0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
-     0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-    -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+        // Positions            // Colors           // Texture Coords
+        // Front face
+        -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+        0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+        0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
 
-    // Back face
-    -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
-     0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
-     0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-    -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+        // Back face
+        -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+        0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+        0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
 
-    // Left face
-    -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
-    -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
-    -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-    -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+        // Left face
+        -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+        -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+        -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
 
-    // Right face
-     0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
-     0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
-     0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-     0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+        // Right face
+        0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+        0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+        0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
 
-    // Top face
-    -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
-    -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
-     0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-     0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
+        // Top face
+        -0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+        -0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+        0.2f,  0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        0.2f,  0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f,
 
-    // Bottom face
-    -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
-    -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
-     0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
-     0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f
-};
+        // Bottom face
+        -0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 0.0f,
+        -0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 0.0f,
+        0.2f, -0.2f,  0.2f,    1.0f, 1.0f, 1.0f,   1.0f, 1.0f,
+        0.2f, -0.2f, -0.2f,    1.0f, 1.0f, 1.0f,   0.0f, 1.0f
+    };
 
     GLuint indices[] = {
         // Front face
@@ -132,48 +120,155 @@ void Player::init() {
     playerTexture->textureUnit(playerShader, "texture1", 0);
 }
 
-void Player::draw(int width, int height) {
-    // transform = glm::translate(transform, position);
+// Setup the model matrix for the player
+void Player::setupModelMatrix(Camera* camera) {
+    // Calculate the model matrix
+    // Calculate the model matrix
+    model = glm::mat4(1.0f); // Identity matrix for the model
 
-    // Init model, view, and projection matrices
-    glm::mat4 model = glm::mat4(1.0f);
-    glm::mat4 view = glm::mat4(1.0f);
-    glm::mat4 projection = glm::mat4(1.0f);
+    // Set the model position for the player
+    model = glm::translate(model, position); // Translate the model to the player's position
 
-    model = glm::translate(model, position); // Apply translation based on the position vector to move 3d object.
-    view = glm::translate(view, glm::vec3(0.0f, -0.5f, -2.0f));
-    projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
+    // Apply rotation to the model based on player's orientation
+    float playerRotationAngle = glm::degrees(atan2(orientation.z, orientation.x));
+    model = glm::rotate(model, glm::radians(-playerRotationAngle), up); 
+
+    // Calculate camera position based on player's orientation
+    glm::vec3 front = glm::normalize(orientation);
+    glm::vec3 cameraOffset = glm::vec3(0.0f, 0.5f, -2.5f); // Adjust this offset as necessary
+    camera->position = position + front * cameraOffset.z + glm::vec3(0.0f, cameraOffset.y, 0.0f); // Use the front vector for direction
+}
+
+void Player::setPositionFromModelMatrix() {
+    position = glm::vec3(model[3]);  // Extracts the translation part of the model matrix
+}
+
+// General method to draw any player
+void Player::draw(Camera* camera) {
     playerShader->Activate();
-
-    glUniformMatrix4fv(playerShader->modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(playerShader->viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(playerShader->projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
+    // Set the view and projection matrices
+    camera->matrix(45.0f, 0.1f, 300.0f, playerShader, "camMatrix");
+    glUniformMatrix4fv(glGetUniformLocation(playerShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+    // Common rendering code
     playerTexture->Bind();
+    playerVAO->Bind();
+    glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, 0);
+    playerVAO->Unbind();
+}
 
+void Player::drawRemote(){
+    playerShader->Activate();
+    glUniformMatrix4fv(glGetUniformLocation(playerShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+    playerTexture->Bind();
     playerVAO->Bind();
     glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, 0);
     playerVAO->Unbind();
 }
 
 void Player::keyboard_input(GLFWwindow* window) {
-    float xOffset = 0.2f;
-    float yOffset = 0.2f;
+	// Handles key inputs
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+		position += speed * orientation;
+	}
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+		position += speed * -glm::normalize(glm::cross(orientation, up));
+	}
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+		position += speed * -orientation;
+	}
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+		position += speed * glm::normalize(glm::cross(orientation, up));
+	}
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
+		position += speed * up;
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS){
+		position += speed * -up;
+	}
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
+		speed = 0.1f;
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE){
+		speed = 0.01f;
+	}
+}
 
-    if (position.y < 1 - yOffset && glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-        position.y += speed;
-    }
-    if (position.y > -1 + yOffset && glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-        position.y -= speed;
-    }
-    if (position.x < 1 - xOffset && glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-        position.x += speed;
-    }
-    if (position.x > -1 + xOffset && glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-        position.x -= speed;
+void Player::updateOrientation() {
+    // Update the player model's orientation
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw));
+    front.z = sin(glm::radians(yaw));
+    orientation = glm::normalize(front);
+}
+
+void Player::mouse_input(GLFWwindow* window, Camera* camera) {
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+
+    // Check if the left mouse button is pressed
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+        double mouseX, mouseY;
+        glfwGetCursorPos(window, &mouseX, &mouseY);
+
+        float rotX = sensitivity * (float)(mouseY - (height / 2)); // Vertical movement
+        float rotY = sensitivity * (float)(mouseX - (width / 2));  // Horizontal movement
+
+        yaw += rotY;
+        pitch += rotX;
+
+        // Clamp pitch to avoid gimbal lock (prevent looking straight up or down)
+        if (pitch > 0) pitch = 0;
+        if (pitch < -15.0f) pitch = -15.0f;
+
+        // Update player orientation based on yaw
+        updateOrientation();
+
+        // Update camera orientation based on pitch
+        camera->updateCameraOrientation(yaw, pitch);
+
+        // Reset cursor position
+        glfwSetCursorPos(window, (width / 2), (height / 2));
+
+    } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
+        // Unhide the cursor when LMB is released
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     }
 }
 
-void Player::mouse_input(GLFWwindow* window) {
+// void Player::mouse_input(GLFWwindow* window) {
+//     int width, height;
+//     glfwGetWindowSize(window, &width, &height);
 
-}
+//     // Check if the mouse cursor is disabled
+//     if (glfwGetInputMode(window, GLFW_CURSOR) != GLFW_CURSOR_DISABLED) {
+//         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//         glfwSetCursorPos(window, width / 2, height / 2); // Set to center on first call
+//     }
+
+//     // Fetch the current cursor position
+//     double mouseX, mouseY;
+//     glfwGetCursorPos(window, &mouseX, &mouseY);
+
+//     // Calculate the offset from the center of the screen
+//     float rotX = sensitivity * (float)(mouseY - (height / 2)) / height;
+//     float rotY = sensitivity * (float)(mouseX - (width / 2)) / width;
+
+//     // Update the yaw and pitch values
+//     yaw -= rotY; // Left/right
+//     pitch -= rotX; // Up/down
+
+//     // Clamp pitch to prevent flipping at the poles
+//     pitch = glm::clamp(pitch, -89.0f, 89.0f);
+
+//     // Update the camera orientation based on yaw and pitch
+//     glm::vec3 direction;
+//     direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+//     direction.y = sin(glm::radians(pitch));
+//     direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+//     orientation = glm::normalize(direction);
+
+//     // Set the cursor position back to the center
+//     glfwSetCursorPos(window, width / 2, height / 2);
+// }

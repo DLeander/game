@@ -73,6 +73,12 @@ void Client::init(){
     player = new Player(playerShader);
 
     camera = new Camera(window_width, window_height, glm::vec3(0.0f, 0.0f, 2.0f));
+
+    // Init terrain
+    terrain.init("resources/terrain/heightmap.raw", 128, 0.2f);
+
+    // Do wrireframe mode
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 // Start the client game loop.
@@ -80,15 +86,24 @@ void Client::loop(){
     // Main game loop
 	while (!glfwWindowShouldClose(window))
 	{
-        // Set up the client camera
-        camera->matrix(45.0f, 0.1f, 100.0f, playerShader, "projection");
+        glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+        // Set up the client camera and read inputs
+        // camera->inputs(window);
 
         // Render the world and players
-        // world();
         render();
 
+        glfwSwapBuffers(window);
 		// Take care of all GLFW events
 		glfwPollEvents();
+
+        GLenum err = glGetError();
+        if (err != GL_NO_ERROR) {
+            std::cerr << "OpenGL Error: " << err << std::endl;
+        }
 	}
     socket_active = false;
 }
@@ -103,13 +118,17 @@ void Client::renderPlayers(){
             x.second->init();
             x.second->setInitialised(true);
         }
-        x.second->draw(window_width, window_height);
+        x.second->drawRemote();
     }
 }
 
+ void Client::renderWorld(){
+    terrain.Render(camera);
+ }
+
 void Client::sendPlayerInfo(){
     while (socket_active.load()){
-        Package package(PLAYER_INFO, clientID, player->position);
+        Package package(PLAYER_INFO, clientID, player->model);
         network.sendToServer(package);
     }
 }
@@ -129,7 +148,8 @@ void Client::receivePlayersInfo(){
                 mtx.unlock();
                 continue;
             }
-            otherPlayers[package.clientID]->position = package.position;
+            otherPlayers[package.clientID]->model = package.model;
+            otherPlayers[package.clientID]->setPositionFromModelMatrix();
         }
         else{
             // If the package is a disconnect package and the player is not previously loaded by the client, ignore the package.
@@ -138,27 +158,24 @@ void Client::receivePlayersInfo(){
                 continue;
             }
             // If the player is not in the map, add the player to the map but do not initialize it, as it has to be done on the main thread (main loop()).
-            otherPlayers[package.clientID] = new Player(playerShader, playerInfo(package.position));
+            otherPlayers[package.clientID] = new Player(playerShader, package.model);
+            otherPlayers[package.clientID]->setPositionFromModelMatrix();
         }
         mtx.unlock();
     }
 }
 
-void Client::world(){
-
-}
-
 // Render the client.
 void Client::render() {
-    glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    renderWorld();
 
     player->keyboard_input(window);
-    player->draw(window_width, window_height);
+    player->mouse_input(window, camera);
+    player->setupModelMatrix(camera);
+    player->draw(camera);
 
     renderPlayers();
-
-    glfwSwapBuffers(window);
 }
 
 // Mouse callback functions for the client.

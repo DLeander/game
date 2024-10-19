@@ -33,7 +33,10 @@ boost::uuids::uuid ClientNetwork::connect() {
 
     // Specify server address
     server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(8080); 
+    server_address.sin_port = htons(49154); 
+    // Localhost
+    // 127.0.0.1
+    // "90.225.101.50"
     if (inet_pton(AF_INET, "127.0.0.1", &server_address.sin_addr) <= 0) {
         perror("inet_pton failed");
         close(client_socket);
@@ -80,7 +83,7 @@ boost::uuids::uuid ClientNetwork::connect() {
 
 void ClientNetwork::disconnect(){
     // Send the client ID to the server to disconnect.
-    Package disconnectPackage(PLAYER_DISCONNECT, clientID, glm::vec3(0.0f, 0.0f, 0.0f));
+    Package disconnectPackage(PLAYER_DISCONNECT, clientID);
     sendToServer(disconnectPackage);
     // Wait for the server to disconnect the client
     // std::this_thread::sleep_for(std::chrono::milliseconds(100));

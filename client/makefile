@@ -5,10 +5,10 @@ CXX = g++
 CXXFLAGS = -Wall -g -std=c++11
 
 # Include paths
-INCLUDES = -Iinclude -Iinclude/glm -Iinclude/stb -I/usr/include/GLFW -I/usr/include/boost -Iinclude/client -Iinclude/shader -Iinclude/objects -Iinclude/texture
+INCLUDES = -Iinclude -Iinclude/glm -Iinclude/stb -I/usr/include/GLFW -I/usr/include/boost -Iinclude/client -Iinclude/shader -Iinclude/objects -Iinclude/texture -Iinclude/world/terrain
 
 # Source files
-CPP_SRCS = main.cpp src/stb/stb.cpp src/client/client.cpp src/shader/shaderClass.cpp src/objects/EBO.cpp src/objects/VAO.cpp src/objects/VBO.cpp src/client/camera.cpp src/client/player.cpp src/client/client_network.cpp src/texture/texture.cpp
+CPP_SRCS = main.cpp src/stb/stb.cpp src/client/client.cpp src/shader/shaderClass.cpp src/objects/EBO.cpp src/objects/VAO.cpp src/objects/VBO.cpp src/client/camera.cpp src/client/player.cpp src/client/client_network.cpp src/texture/texture.cpp src/world/terrain/terrain.cpp src/world/terrain/bruteforce.cpp
 C_SRCS = src/glad/gl.c
 
 # Object files

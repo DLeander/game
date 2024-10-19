@@ -16,21 +16,25 @@ enum PackageType {
 struct Package {
     PackageType type; // One indicates that its a player info package, two indicates that its a player connect package.
     boost::uuids::uuid clientID;
-    glm::vec3 position;
+    glm::mat4 model;
 
     Package(){
-        type = PLAYER_CONNECT;
-        clientID = boost::uuids::nil_uuid();
-        position = glm::vec3(0.0f, 0.0f, 0.0f);
+        this->type = PLAYER_CONNECT;
+        this->clientID = boost::uuids::nil_uuid();
+        this->model = glm::mat4(1.0f);
     }
-    Package(PackageType type, boost::uuids::uuid clientID, glm::vec3 position){
+    Package(PackageType type, boost::uuids::uuid clientID, glm::mat4 model){
         this->type = type;
         this->clientID = clientID;
-        this->position = position;
+        this->model = model;
+    }
+    Package(PackageType type, boost::uuids::uuid clientID){
+        this->type = type;
+        this->clientID = clientID;
     }
     Package(boost::uuids::uuid clientID){
         this->type = PLAYER_CONNECT;
         this->clientID = clientID;
-        this->position = glm::vec3(0.0f, 0.0f, 0.0f);
+        this->model = glm::mat4(1.0f);
     }
 };

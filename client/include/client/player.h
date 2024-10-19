@@ -18,32 +18,42 @@
 #include "objects/VBO.h"
 #include "objects/EBO.h"
 #include "texture/texture.h"
-
-struct playerInfo{
-    glm::vec3 position;
-
-    playerInfo(glm::vec3 position){
-        this->position = position;
-    }
-};
+#include "camera.h"
 
 class Player {
     public:
         // Variables
+
+        // Rendering variables
         Shader* playerShader;
         VAO* playerVAO;
         VBO* playerVBO;
         EBO* playerEBO;
+
+        // Player position
         glm::vec3 position;
+        glm::mat4 model;
         float speed;
+
+        // Mouse movement variables
+        glm::vec3 orientation = glm::vec3(0.0f, 0.0f, -1.0f);
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        float sensitivity = 0.005f;
+        float yaw = 0.0f;
+        float pitch = 0.0f;
+
         // Methods
         Player(Shader* shader);
-        Player(Shader* shader, playerInfo info);
+        Player(Shader* shader, glm::mat4 model);
         ~Player();
         void init();
-        void draw(int width, int height);
+        void setupModelMatrix(Camera* camera);
+        void setPositionFromModelMatrix();
+        void draw(Camera* camera);
+        void drawRemote();
         void keyboard_input(GLFWwindow* window);
-        void mouse_input(GLFWwindow* window);
+        void mouse_input(GLFWwindow* window, Camera* camera);
+        void updateOrientation();
         bool isInitialised() { return initialised; };
         void setInitialised(bool initialised) { this->initialised = initialised; };
     private:
@@ -52,6 +62,9 @@ class Player {
         int indices_size;
 
         Texture* playerTexture;
+
+        glm::vec2 oldMousePosition;
+        bool firstClick = true;
 
         // Methods
 };

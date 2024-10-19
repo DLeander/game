@@ -6,14 +6,14 @@ layout (location = 2) in vec2 aTex;
 out vec3 color;
 out vec2 texCoord;
 
-// out vec2 texCoord;
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 camMatrix;     // Projection matrix times the view matrix.
+uniform mat4 model;        // Model matrix for object-specific transformations
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
+    // Apply the model, view, and projection matrices to position the object relative to the camera
+    gl_Position = camMatrix * model * vec4(aPos, 1.0);
+
     color = aColor;
     texCoord = aTex;
 }

@@ -32,6 +32,8 @@
 #include "common.h"
 #include "client_network.h"
 #include "camera.h"
+#include "terrain.h"
+#include "bruteforce.h"
 
 namespace std {
     template <>
@@ -68,6 +70,7 @@ class Client{
         boost::uuids::uuid clientID;
         Player* player;
         std::unordered_map<boost::uuids::uuid, Player*> otherPlayers;
+        BruteForce terrain;
         Camera* camera;
 
         // Methods
@@ -77,7 +80,7 @@ class Client{
         void renderPlayers();
         void receivePlayersInfo();
         void sendPlayerInfo();
-        void world();
+        void renderWorld();
         static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
         static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
         static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);

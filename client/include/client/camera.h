@@ -16,24 +16,25 @@ class Camera {
         glm::vec3 position;
         glm::vec3 orientation = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        glm::mat4 view;
+        glm::mat4 projection;
         
         int width;
         int height;
 
-        float speed = 0.1f;
-        float sensitivity = 100.0f;
+        float speed = 0.001f;
+        float sensitivity = 1.0f;
 
         // Methods
         Camera(int width, int height, glm::vec3 position);
-        
         void matrix(float FOVdeg, float nearPlane, float farPlane, Shader* shader, const char* uniform);
+        void updateCameraOrientation(float yaw, float pitch);
+        // void matrix(float FOVdeg, float nearPlane, float farPlane, Shader* shader, glm::mat4 model);
         void inputs(GLFWwindow* window);
+
     private:
-        // Variables
-        glm::mat4 view;
-        glm::mat4 projection;
         glm::vec2 oldMousePosition;
         bool firstClick = true;
         // Methods
-        void updateCameraVectors();
 };

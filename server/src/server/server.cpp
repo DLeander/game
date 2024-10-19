@@ -14,24 +14,30 @@ void Server::run(){
     loop();
 }
 
-void Server::init(){
+void Server::init() {
     // Create server socket
     serverSocket = socket(AF_INET, SOCK_DGRAM, 0);
     if (serverSocket < 0) {
-        throw "Failed to create socket";
+        throw std::runtime_error("Failed to create socket");
     }
-    // specifying the address 
-    sockaddr_in server_address; 
-    server_address.sin_family = AF_INET; 
-    server_address.sin_port = htons(8080); 
-    server_address.sin_addr.s_addr = INADDR_ANY; 
+
+    // Specify the address
+    sockaddr_in server_address;
+    memset(&server_address, 0, sizeof(server_address));  // Zero out the structure
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(49154);
+
+    // INADDR_ANY makes the server to listen on all interfaces
+    server_address.sin_addr.s_addr = INADDR_ANY;
 
     // Bind the socket with the server address
     if (bind(serverSocket, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
-        throw "Failed to bind socket";
+        close(serverSocket);
+        throw std::runtime_error("Failed to bind socket");
     }
 
-    std::cout << "SERVER:" << inet_ntoa(server_address.sin_addr) << " Port: "  << ntohs(server_address.sin_port) << std::endl;
+    std::cout << "SERVER: " << inet_ntoa(server_address.sin_addr) 
+              << " Port: " << ntohs(server_address.sin_port) << std::endl;
 }
 
 // Start the server loop.
