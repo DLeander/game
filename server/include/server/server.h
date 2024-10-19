@@ -20,16 +20,16 @@
 // Custom
 #include "common.h"
 
-struct clientInfo{
-    bool connected;
-    sockaddr_in address;
+struct SCLIENT_INFO{
+    bool s_bConnected;
+    sockaddr_in s_sainAddress;
 
-    clientInfo(){
-        connected = false;
+    SCLIENT_INFO(){
+        s_bConnected = false;
     }
-    clientInfo(bool connected, sockaddr_in address){
-        this->connected = connected;
-        this->address = address;
+    SCLIENT_INFO(bool bConnected, sockaddr_in sainAddress){
+        s_bConnected = bConnected;
+        s_sainAddress = sainAddress;
     }
 };
 
@@ -44,21 +44,22 @@ namespace std {
     };
 }
 
-class Server{
+class CSERVER{
     public:
         // Variables
         // Methods
-        Server(int numClients);
-        ~Server();
+        CSERVER(int iClients);
+        ~CSERVER();
         void run();
     private:
         // Variables
-        int serverSocket;
-        std::atomic<bool> running;
-        std::vector<std::thread> threads;
-        std::mutex mtx;
-        std::unordered_map<boost::uuids::uuid, Package> packages;
-        std::unordered_map<boost::uuids::uuid, clientInfo> clients;
+        int m_iServerSocket;
+        std::atomic<bool> m_abRunning;
+        std::vector<std::thread> m_vThreads;
+        std::mutex m_mtx;
+        std::unordered_map<boost::uuids::uuid, SPACKAGE> m_umPackages;
+        std::unordered_map<boost::uuids::uuid, SCLIENT_INFO> m_umClients;
+
         // Methods
         void init();
         void loop();

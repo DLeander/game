@@ -10,23 +10,23 @@
 
 std::string get_file_contents(const char *filename);
 
-class Shader
+class CSHADER
 {
     public:
         // Variables
-        GLuint ID;
+        GLuint m_ID;
 
         // Make this into a map where all locations are stored:
         // std::map<std::string, GLuint> locations;
-        GLuint modelLoc;
-        GLuint viewLoc;
-        GLuint projectionLoc;
-        GLuint textureLoc;
+        GLuint m_modelLoc;
+        GLuint m_viewLoc;
+        GLuint m_projectionLoc;
+        GLuint m_textureLoc;
 
 
         // Methods
-        Shader();
-        Shader(const char *vertexPath, const char *fragmentPath);
+        CSHADER();
+        CSHADER(const char *vertexPath, const char *fragmentPath);
         void Activate();
         void Delete();
     private:

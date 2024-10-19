@@ -46,32 +46,32 @@ namespace std {
     };
 }
 
-class Client{
+class CCLIENT{
     public:
-        Client();
-        ~Client();
+        CCLIENT();
+        ~CCLIENT();
         void run();
     private:
         // Variables
-        std::vector<std::thread> threads;
-        std::mutex mtx;
-        Shader* playerShader;
+        std::vector<std::thread> m_vThreads;
+        std::mutex m_mtx;
+        CSHADER* m_playerShader;
         // Window
-        GLFWwindow* window;
-        int window_height;
-        int window_width;
+        GLFWwindow* m_window;
+        int m_iWindowHeight;
+        int m_iWindowWidth;
 
 
         // Networking
-        ClientNetwork network;
-        std::atomic<bool> socket_active; // To indicate if the socket is active or not
+        CCLIENTNETWORK m_network;
+        std::atomic<bool> m_abSocketActive; // To indicate if the socket is active or not
 
         // Player
-        boost::uuids::uuid clientID;
-        Player* player;
-        std::unordered_map<boost::uuids::uuid, Player*> otherPlayers;
-        BruteForce terrain;
-        Camera* camera;
+        boost::uuids::uuid m_uuidClientID;
+        CPLAYER* m_player;
+        std::unordered_map<boost::uuids::uuid, CPLAYER*> m_umOtherPlayers;
+        CBRUTEFORCE m_terrain;
+        CCAMERA* m_camera;
 
         // Methods
         void init();
@@ -81,9 +81,9 @@ class Client{
         void receivePlayersInfo();
         void sendPlayerInfo();
         void renderWorld();
-        static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-        static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
-        static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-        static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+        static void mouse_callback(GLFWwindow* window, double dXpos, double dYpos);
+        static void scroll_callback(GLFWwindow* window, double dXoffset, double dYoffset);
+        static void key_callback(GLFWwindow* window, int iKey, int iScancode, int iAction, int iMods);
+        static void mouse_button_callback(GLFWwindow* window, int iButton, int iAction, int mods);
         void cleanup();
 };

@@ -1,17 +1,14 @@
-#ifndef VBO_CLASS_H
-#define VBO_CLASS_H
+#pragma once
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
 
-class VBO{
+class CVBO{
     public:
-        GLuint ID;
-        VBO(GLfloat* vertices, GLsizeiptr size);
+        GLuint m_ID;
+        CVBO(GLfloat* vertices, GLsizeiptr size);
         void Bind();
         void Unbind();
         void Delete();
 };
-
-#endif // VBO_CLASS_H

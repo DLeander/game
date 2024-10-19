@@ -8,14 +8,14 @@
 // GLM
 #include<glm/glm.hpp>
 
-class BruteForce : public Terrain {
+class CBRUTEFORCE : public CTERRAIN {
 public:
     // Constructor
-    BruteForce(){}
+    CBRUTEFORCE(){}
 
     // Destructor
-    ~BruteForce(){}
+    ~CBRUTEFORCE(){}
 
     // Implement the Render method from Terrain
-    void Render(Camera* camera) override;
+    void render(CCAMERA* camera) override;
 };

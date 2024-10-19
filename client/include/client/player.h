@@ -20,51 +20,51 @@
 #include "texture/texture.h"
 #include "camera.h"
 
-class Player {
+class CPLAYER {
     public:
         // Variables
 
         // Rendering variables
-        Shader* playerShader;
-        VAO* playerVAO;
-        VBO* playerVBO;
-        EBO* playerEBO;
+        CSHADER* m_playerShader;
+        CVAO* m_playerVAO;
+        CVBO* m_playerVBO;
+        CEBO* m_playerEBO;
 
         // Player position
-        glm::vec3 position;
-        glm::mat4 model;
-        float speed;
+        glm::vec3 m_v3Position;
+        glm::mat4 m_m4Model;
+        float m_fSpeed;
 
         // Mouse movement variables
-        glm::vec3 orientation = glm::vec3(0.0f, 0.0f, -1.0f);
-        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-        float sensitivity = 0.005f;
-        float yaw = 0.0f;
-        float pitch = 0.0f;
+        glm::vec3 m_v3Orientation = glm::vec3(0.0f, 0.0f, -1.0f);
+        glm::vec3 m_v3Up = glm::vec3(0.0f, 1.0f, 0.0f);
+        float m_fSensitivity = 0.005f;
+        float m_fYaw = 0.0f;
+        float m_fPitch = 0.0f;
 
         // Methods
-        Player(Shader* shader);
-        Player(Shader* shader, glm::mat4 model);
-        ~Player();
+        CPLAYER(CSHADER* shader);
+        CPLAYER(CSHADER* shader, glm::mat4 m4Model);
+        ~CPLAYER();
         void init();
-        void setupModelMatrix(Camera* camera);
+        void setupModelMatrix(CCAMERA* camera);
         void setPositionFromModelMatrix();
-        void draw(Camera* camera);
+        void draw(CCAMERA* camera);
         void drawRemote();
         void keyboard_input(GLFWwindow* window);
-        void mouse_input(GLFWwindow* window, Camera* camera);
+        void mouse_input(GLFWwindow* window, CCAMERA* camera);
         void updateOrientation();
-        bool isInitialised() { return initialised; };
-        void setInitialised(bool initialised) { this->initialised = initialised; };
+        bool isInitialised() { return m_bInitialised; };
+        void setInitialised(bool bInitialised) { m_bInitialised = bInitialised; };
     private:
         // Variables
-        bool initialised;
-        int indices_size;
+        bool m_bInitialised;
+        int m_iIndicesSize;
 
-        Texture* playerTexture;
+        Texture* m_playerTexture;
 
-        glm::vec2 oldMousePosition;
-        bool firstClick = true;
+        glm::vec2 m_v2OldMousePosition;
+        bool m_bFirstClick = true;
 
         // Methods
 };

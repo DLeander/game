@@ -1,39 +1,40 @@
 #include "client/player.h"
 
-Player::Player(Shader* shader) {
+CPLAYER::CPLAYER(CSHADER* shader) {
     // Initialize the player's position
-    model = glm::mat4(1.0f);
-    position = glm::vec3(0.0f, 0.0f, 0.0f);
-    playerShader = shader;
+    m_m4Model = glm::mat4(1.0f);
+    m_v3Position = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_playerShader = shader;
     init();
-    initialised = true;
+    m_bInitialised = true;
 }
 
-Player::Player(Shader* shader, glm::mat4 model){
-    model = model;
-    playerShader = shader;
-    initialised = false;
+CPLAYER::CPLAYER(CSHADER* shader, glm::mat4 m4Model){
+    m_m4Model = m4Model;
+    m_playerShader = shader;
+    m_bInitialised = false;
 }
 
-Player::~Player() {
+CPLAYER::~CPLAYER() {
     // Delete the player's VAO, VBO, and EBO
-    playerVAO->Delete();
-    playerVBO->Delete();
-    playerEBO->Delete();
-    delete playerVAO;
-    delete playerVBO;
-    delete playerEBO;
+    m_playerVAO->Delete();
+    m_playerVBO->Delete();
+    m_playerEBO->Delete();
+    delete m_playerVAO;
+    delete m_playerVBO;
+    delete m_playerEBO;
 
     // Delete the player's shader
-    playerShader->Delete();
-    delete playerShader;
+    m_playerShader->Delete();
+    delete m_playerShader;
 
-    playerTexture->Delete();
+    m_playerTexture->Delete();
 }
 
-void Player::init() {
-    speed = 0.01f;
-    position = glm::vec3(0.0f, 0.0f, 0.0f);
+void CPLAYER::init() {
+    m_fSpeed = 0.01f;
+    m_v3Position = glm::vec3(0.0f, 0.0f, 0.0f);
+
     GLfloat vertices[] = {
         // Positions            // Colors           // Texture Coords
         // Front face
@@ -93,143 +94,144 @@ void Player::init() {
         20, 21, 22,
         22, 23, 20
     };
-    indices_size = sizeof(indices)/sizeof(int);
+
+    m_iIndicesSize = sizeof(indices)/sizeof(int);
 
     // Init VAO
-    playerVAO = new VAO();
+    m_playerVAO = new CVAO();
     // Bind VAO
-	playerVAO->Bind();
+	m_playerVAO->Bind();
 
 	// Generates Vertex Buffer Object and links it to vertices
-	playerVBO = new VBO(vertices, sizeof(vertices));
+	m_playerVBO = new CVBO(vertices, sizeof(vertices));
 	// Generates Element Buffer Object and links it to indices
-	playerEBO = new EBO(indices, sizeof(indices));
+	m_playerEBO = new CEBO(indices, sizeof(indices));
 
     // Links VBO attributes such as coordinates and colors to VAO
-	playerVAO->LinkAttrib(*playerVBO, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
-	playerVAO->LinkAttrib(*playerVBO, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    playerVAO->LinkAttrib(*playerVBO, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	m_playerVAO->LinkAttrib(*m_playerVBO, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
+	m_playerVAO->LinkAttrib(*m_playerVBO, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    m_playerVAO->LinkAttrib(*m_playerVBO, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     // Unbind all to prevent accidentally modifying them
-    playerVAO->Unbind();
-    playerVBO->Unbind();
-    playerEBO->Unbind();
+    m_playerVAO->Unbind();
+    m_playerVBO->Unbind();
+    m_playerEBO->Unbind();
 
     // Load the player's texture
-    playerTexture = new Texture("resources/textures/player/mulah.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    playerShader->Activate();
-    playerTexture->textureUnit(playerShader, "texture1", 0);
+    m_playerTexture = new Texture("resources/textures/player/mulah.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    m_playerShader->Activate();
+    m_playerTexture->textureUnit(m_playerShader, "texture1", 0);
 }
 
 // Setup the model matrix for the player
-void Player::setupModelMatrix(Camera* camera) {
+void CPLAYER::setupModelMatrix(CCAMERA* camera) {
     // Calculate the model matrix
     // Calculate the model matrix
-    model = glm::mat4(1.0f); // Identity matrix for the model
+    m_m4Model = glm::mat4(1.0f); // Identity matrix for the model
 
     // Set the model position for the player
-    model = glm::translate(model, position); // Translate the model to the player's position
+    m_m4Model = glm::translate(m_m4Model, m_v3Position); // Translate the model to the player's position
 
     // Apply rotation to the model based on player's orientation
-    float playerRotationAngle = glm::degrees(atan2(orientation.z, orientation.x));
-    model = glm::rotate(model, glm::radians(-playerRotationAngle), up); 
+    float fPlayerRotationAngle = glm::degrees(atan2(m_v3Orientation.z, m_v3Orientation.x));
+    m_m4Model = glm::rotate(m_m4Model, glm::radians(-fPlayerRotationAngle), m_v3Up); 
 
     // Calculate camera position based on player's orientation
-    glm::vec3 front = glm::normalize(orientation);
-    glm::vec3 cameraOffset = glm::vec3(0.0f, 0.5f, -2.5f); // Adjust this offset as necessary
-    camera->position = position + front * cameraOffset.z + glm::vec3(0.0f, cameraOffset.y, 0.0f); // Use the front vector for direction
+    glm::vec3 v3Front = glm::normalize(m_v3Orientation);
+    glm::vec3 v3CameraOffset = glm::vec3(0.0f, 0.5f, -2.5f); // Adjust this offset as necessary
+    camera->m_v3Position = m_v3Position + v3Front * v3CameraOffset.z + glm::vec3(0.0f, v3CameraOffset.y, 0.0f); // Use the front vector for direction
 }
 
-void Player::setPositionFromModelMatrix() {
-    position = glm::vec3(model[3]);  // Extracts the translation part of the model matrix
+void CPLAYER::setPositionFromModelMatrix() {
+    m_v3Position = glm::vec3(m_m4Model[3]);  // Extracts the translation part of the model matrix
 }
 
 // General method to draw any player
-void Player::draw(Camera* camera) {
-    playerShader->Activate();
+void CPLAYER::draw(CCAMERA* camera) {
+    m_playerShader->Activate();
     // Set the view and projection matrices
-    camera->matrix(45.0f, 0.1f, 300.0f, playerShader, "camMatrix");
-    glUniformMatrix4fv(glGetUniformLocation(playerShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+    camera->matrix(45.0f, 0.1f, 300.0f, m_playerShader, "camMatrix");
+    glUniformMatrix4fv(glGetUniformLocation(m_playerShader->m_ID, "model"), 1, GL_FALSE, glm::value_ptr(m_m4Model));
     // Common rendering code
-    playerTexture->Bind();
-    playerVAO->Bind();
-    glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, 0);
-    playerVAO->Unbind();
+    m_playerTexture->Bind();
+    m_playerVAO->Bind();
+    glDrawElements(GL_TRIANGLES, m_iIndicesSize, GL_UNSIGNED_INT, 0);
+    m_playerVAO->Unbind();
 }
 
-void Player::drawRemote(){
-    playerShader->Activate();
-    glUniformMatrix4fv(glGetUniformLocation(playerShader->ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-    playerTexture->Bind();
-    playerVAO->Bind();
-    glDrawElements(GL_TRIANGLES, indices_size, GL_UNSIGNED_INT, 0);
-    playerVAO->Unbind();
+void CPLAYER::drawRemote(){
+    m_playerShader->Activate();
+    glUniformMatrix4fv(glGetUniformLocation(m_playerShader->m_ID, "model"), 1, GL_FALSE, glm::value_ptr(m_m4Model));
+    m_playerTexture->Bind();
+    m_playerVAO->Bind();
+    glDrawElements(GL_TRIANGLES, m_iIndicesSize, GL_UNSIGNED_INT, 0);
+    m_playerVAO->Unbind();
 }
 
-void Player::keyboard_input(GLFWwindow* window) {
+void CPLAYER::keyboard_input(GLFWwindow* window) {
 	// Handles key inputs
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-		position += speed * orientation;
+		m_v3Position += m_fSpeed * m_v3Orientation;
 	}
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-		position += speed * -glm::normalize(glm::cross(orientation, up));
+		m_v3Position += m_fSpeed * -glm::normalize(glm::cross(m_v3Orientation, m_v3Up));
 	}
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-		position += speed * -orientation;
+		m_v3Position += m_fSpeed * -m_v3Orientation;
 	}
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-		position += speed * glm::normalize(glm::cross(orientation, up));
+		m_v3Position += m_fSpeed * glm::normalize(glm::cross(m_v3Orientation, m_v3Up));
 	}
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
-		position += speed * up;
+		m_v3Position += m_fSpeed * m_v3Up;
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS){
-		position += speed * -up;
+		m_v3Position += m_fSpeed * -m_v3Up;
 	}
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
-		speed = 0.1f;
+		m_fSpeed = 0.1f;
 	}
 	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE){
-		speed = 0.01f;
+		m_fSpeed = 0.01f;
 	}
 }
 
-void Player::updateOrientation() {
+void CPLAYER::updateOrientation() {
     // Update the player model's orientation
-    glm::vec3 front;
-    front.x = cos(glm::radians(yaw));
-    front.z = sin(glm::radians(yaw));
-    orientation = glm::normalize(front);
+    glm::vec3 v3Front;
+    v3Front.x = cos(glm::radians(m_fYaw));
+    v3Front.z = sin(glm::radians(m_fYaw));
+    m_v3Orientation = glm::normalize(v3Front);
 }
 
-void Player::mouse_input(GLFWwindow* window, Camera* camera) {
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
+void CPLAYER::mouse_input(GLFWwindow* window, CCAMERA* camera) {
+    int iWidth, iHeight;
+    glfwGetWindowSize(window, &iWidth, &iHeight);
 
     // Check if the left mouse button is pressed
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-        double mouseX, mouseY;
-        glfwGetCursorPos(window, &mouseX, &mouseY);
+        double dMouseX, dMouseY;
+        glfwGetCursorPos(window, &dMouseX, &dMouseY);
 
-        float rotX = sensitivity * (float)(mouseY - (height / 2)); // Vertical movement
-        float rotY = sensitivity * (float)(mouseX - (width / 2));  // Horizontal movement
+        float fRotX = m_fSensitivity * (float)(dMouseY - (iHeight / 2)); // Vertical movement
+        float fRotY = m_fSensitivity * (float)(dMouseX - (iWidth / 2));  // Horizontal movement
 
-        yaw += rotY;
-        pitch += rotX;
+        m_fYaw += fRotY;
+        m_fPitch += fRotX;
 
         // Clamp pitch to avoid gimbal lock (prevent looking straight up or down)
-        if (pitch > 0) pitch = 0;
-        if (pitch < -15.0f) pitch = -15.0f;
+        if (m_fPitch > 0) m_fPitch = 0;
+        if (m_fPitch < -15.0f) m_fPitch = -15.0f;
 
         // Update player orientation based on yaw
         updateOrientation();
 
         // Update camera orientation based on pitch
-        camera->updateCameraOrientation(yaw, pitch);
+        camera->updateCameraOrientation(m_fYaw, m_fPitch);
 
         // Reset cursor position
-        glfwSetCursorPos(window, (width / 2), (height / 2));
+        glfwSetCursorPos(window, (iWidth / 2), (iHeight / 2));
 
     } else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) {
         // Unhide the cursor when LMB is released
@@ -237,7 +239,7 @@ void Player::mouse_input(GLFWwindow* window, Camera* camera) {
     }
 }
 
-// void Player::mouse_input(GLFWwindow* window) {
+// void CPLAYER::mouse_input(GLFWwindow* window) {
 //     int width, height;
 //     glfwGetWindowSize(window, &width, &height);
 

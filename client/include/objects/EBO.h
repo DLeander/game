@@ -1,17 +1,14 @@
-#ifndef EBO_CLASS_H
-#define EBO_CLASS_H
+#pragma once
 
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 
 
-class EBO{
+class CEBO{
     public:
-        GLuint ID;
-        EBO(GLuint* indices, GLsizeiptr size);
+        GLuint m_ID;
+        CEBO(GLuint* indices, GLsizeiptr size);
         void Bind();
         void Unbind();
         void Delete();
 };
-
-#endif // EBO_CLASS_H

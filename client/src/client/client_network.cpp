@@ -1,89 +1,89 @@
 #include "client_network.h"
 
-ClientNetwork::ClientNetwork(){
+CCLIENTNETWORK::CCLIENTNETWORK(){
 
 }
 
-ClientNetwork::~ClientNetwork(){
+CCLIENTNETWORK::~CCLIENTNETWORK(){
     disconnect();
 }
 
 // Set the socket to non-blocking if socket is about to be disconnect or a connection retry is needed.
-void setReceiveTimeout(int socket, int timeout_ms) {
-    struct timeval timeout;
-    timeout.tv_sec = timeout_ms / 1000;
-    timeout.tv_usec = (timeout_ms % 1000) * 1000;
-    if (setsockopt(socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+void setReceiveTimeout(int iSocket, int iTimeout_ms) {
+    struct timeval stvTimeout;
+    stvTimeout.tv_sec = iTimeout_ms / 1000;
+    stvTimeout.tv_usec = (iTimeout_ms % 1000) * 1000;
+    if (setsockopt(iSocket, SOL_SOCKET, SO_RCVTIMEO, &stvTimeout, sizeof(stvTimeout)) < 0) {
         perror("setsockopt");
         throw std::runtime_error("Failed to set receive timeout");
     }
 }
 
-boost::uuids::uuid ClientNetwork::connect() {
+boost::uuids::uuid CCLIENTNETWORK::connect() {
     // Initialize connection to server
-    client_socket = socket(AF_INET, SOCK_DGRAM, 0);
-    if (client_socket < 0) {
+    m_iClientSocket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (m_iClientSocket < 0) {
         perror("Failed to create socket"); 
         return boost::uuids::nil_uuid();
     }
 
     // Zero out the structures
-    memset(&server_address, 0, sizeof(server_address));
-    memset(&client_address, 0, sizeof(client_address));
+    memset(&m_sainServerAddress, 0, sizeof(m_sainServerAddress));
+    memset(&m_sainClientAddress, 0, sizeof(m_sainClientAddress));
 
     // Specify server address
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(49154); 
+    m_sainServerAddress.sin_family = AF_INET;
+    m_sainServerAddress.sin_port = htons(49154); 
     // Localhost
     // 127.0.0.1
     // "90.225.101.50"
-    if (inet_pton(AF_INET, "127.0.0.1", &server_address.sin_addr) <= 0) {
+    if (inet_pton(AF_INET, "127.0.0.1", &m_sainServerAddress.sin_addr) <= 0) {
         perror("inet_pton failed");
-        close(client_socket);
+        close(m_iClientSocket);
         return boost::uuids::nil_uuid();
     }
 
     // Specify client address
-    client_address.sin_family = AF_INET;
-    client_address.sin_addr.s_addr = INADDR_ANY;
-    client_address.sin_port = htons(0); // Bind to any available port
+    m_sainClientAddress.sin_family = AF_INET;
+    m_sainClientAddress.sin_addr.s_addr = INADDR_ANY;
+    m_sainClientAddress.sin_port = htons(0); // Bind to any available port
 
-    if (bind(client_socket, (struct sockaddr*)&client_address, sizeof(client_address)) == -1) {
+    if (bind(m_iClientSocket, (struct sockaddr*)&m_sainClientAddress, sizeof(m_sainClientAddress)) == -1) {
         perror("Bind failed");
-        close(client_socket);
+        close(m_iClientSocket);
         return boost::uuids::nil_uuid();
     }
 
     // Ask server for client ID 
-    Package initPackage;
-    setReceiveTimeout(client_socket, 100);
-    unsigned int retries = 0;
-    while (retries < 25){
-        if (retries > 0){
+    SPACKAGE initPackage;
+    setReceiveTimeout(m_iClientSocket, 100);
+    unsigned int uiRetries = 0;
+    while (uiRetries < 25){
+        if (uiRetries > 0){
             std::cout << "Retrying to connect to server" << std::endl;
         }
         sendToServer(initPackage);
         std::cout << "Asking server for client ID" << std::endl;
         initPackage = receiveFromServer();
-        if (initPackage.clientID != boost::uuids::nil_uuid()){
+        if (initPackage.s_uuidClientID != boost::uuids::nil_uuid()){
             break;
         }
-        retries++;
+        uiRetries++;
     }
-    if (retries == 25){
+    if (uiRetries == 25){
         std::cout << "Failed to connect to server" << std::endl;
-        close(client_socket);
+        close(m_iClientSocket);
         return boost::uuids::nil_uuid();
     }
-    std::cout << "Created client with uuid: " << initPackage.clientID  << "after " << retries << " retires." << std::endl;
+    std::cout << "Created client with uuid: " << initPackage.s_uuidClientID  << "after " << uiRetries << " retires." << std::endl;
 
-    clientID = initPackage.clientID;
-    return clientID;
+    m_uuidClientID = initPackage.s_uuidClientID;
+    return m_uuidClientID;
 }
 
-void ClientNetwork::disconnect(){
+void CCLIENTNETWORK::disconnect(){
     // Send the client ID to the server to disconnect.
-    Package disconnectPackage(PLAYER_DISCONNECT, clientID);
+    SPACKAGE disconnectPackage(PLAYER_DISCONNECT, m_uuidClientID);
     sendToServer(disconnectPackage);
     // Wait for the server to disconnect the client
     // std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -91,14 +91,14 @@ void ClientNetwork::disconnect(){
     // close(client_socket);
 }
 
-void ClientNetwork::sendToServer(Package package){
-    sendto(client_socket, &package, sizeof(package), 0, (struct sockaddr*)&server_address, sizeof(server_address));
+void CCLIENTNETWORK::sendToServer(SPACKAGE package){
+    sendto(m_iClientSocket, &package, sizeof(package), 0, (struct sockaddr*)&m_sainServerAddress, sizeof(m_sainServerAddress));
 }
 
-Package ClientNetwork::receiveFromServer() {
-    Package package;
-    socklen_t serverAddrLen = sizeof(server_address);
-    ssize_t recvBytes = recvfrom(client_socket, &package, sizeof(Package), 0, (struct sockaddr*)&server_address, &serverAddrLen);
+SPACKAGE CCLIENTNETWORK::receiveFromServer() {
+    SPACKAGE package;
+    socklen_t slServerAddrLen = sizeof(m_sainServerAddress);
+    ssize_t recvBytes = recvfrom(m_iClientSocket, &package, sizeof(SPACKAGE), 0, (struct sockaddr*)&m_sainServerAddress, &slServerAddrLen);
     if (recvBytes == -1) {
         if (errno == EWOULDBLOCK || errno == EAGAIN) {
             // Timeout occurred, continue the loop

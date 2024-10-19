@@ -9,7 +9,7 @@
 #include "client/client.h"
 
 int main(int argc, char *argv[]){   
-    Client client;
+    CCLIENT client;
     client.run();
     return 0;
 }

@@ -10,31 +10,31 @@
 
 #include "shader/shaderClass.h"
 
-class Camera {
+class CCAMERA {
     public:
         // Variables
-        glm::vec3 position;
-        glm::vec3 orientation = glm::vec3(0.0f, 0.0f, -1.0f);
-        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::vec3 m_v3Position;
+        glm::vec3 m_v3Orientation = glm::vec3(0.0f, 0.0f, -1.0f);
+        glm::vec3 m_v3Up = glm::vec3(0.0f, 1.0f, 0.0f);
 
-        glm::mat4 view;
-        glm::mat4 projection;
+        glm::mat4 m_m4View;
+        glm::mat4 m_m4Projection;
         
-        int width;
-        int height;
+        int m_iWidth;
+        int m_iHeight;
 
-        float speed = 0.001f;
-        float sensitivity = 1.0f;
+        float m_fSpeed = 0.001f;
+        float m_fSensitivity = 1.0f;
 
         // Methods
-        Camera(int width, int height, glm::vec3 position);
-        void matrix(float FOVdeg, float nearPlane, float farPlane, Shader* shader, const char* uniform);
-        void updateCameraOrientation(float yaw, float pitch);
+        CCAMERA(int iWidth, int iHeight, glm::vec3 v3Position);
+        void matrix(float fFOVdeg, float fNearPlane, float fFarPlane, CSHADER* shader, const char* uniform);
+        void updateCameraOrientation(float fYaw, float fPitch);
         // void matrix(float FOVdeg, float nearPlane, float farPlane, Shader* shader, glm::mat4 model);
-        void inputs(GLFWwindow* window);
+        // void inputs(GLFWwindow* window);
 
     private:
-        glm::vec2 oldMousePosition;
-        bool firstClick = true;
+        // glm::vec2 oldMousePosition;
+        // bool firstClick = true;
         // Methods
 };

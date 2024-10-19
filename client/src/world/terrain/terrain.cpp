@@ -1,8 +1,8 @@
 #include "terrain.h"
 
-void Terrain::init(const char* filename, int size, float heightScale){
+void CTERRAIN::init(const char* filename, int size, float fHeightScale){
     // Set the height scale
-    Terrain::heightScale = heightScale;
+    m_fHeightScale = fHeightScale;
 
     // Load the height map
     loadHeightMap(filename, size);
@@ -17,81 +17,81 @@ void Terrain::init(const char* filename, int size, float heightScale){
     setupBuffers();
 }
 
-bool Terrain::loadHeightMap(const char* filename, int size) {
+bool CTERRAIN::loadHeightMap(const char* filename, int iSize) {
     FILE* file = fopen(filename, "rb");
 
-    if (heightData.pucData != nullptr) {
+    if (m_heightData.s_pucData != nullptr) {
         unloadHeightMap();
     }
-    Terrain::heightData.pucData = new unsigned char[size * size];
-    std::cout << "Heightmap size: " << size << std::endl;
-    if (heightData.pucData == nullptr) {
+    m_heightData.s_pucData = new unsigned char[iSize * iSize];
+    std::cout << "Heightmap size: " << iSize << std::endl;
+    if (m_heightData.s_pucData == nullptr) {
         std::cerr << "Could not allocate memory for height data" << std::endl;
         return false;
     }
-    fread(heightData.pucData, 1, size * size, file);
+    fread(m_heightData.s_pucData, 1, iSize * iSize, file);
 
     fclose(file);
-    Terrain::size = size;
-    Terrain::heightData.size = size;
+    m_iSize = iSize;
+    m_heightData.s_iSize= iSize;
 
     std::cout << "Heightmap loaded" << std::endl;
     return true;
 }
 
-bool Terrain::unloadHeightMap(){
-    if (heightData.pucData == nullptr) {
-        delete[] heightData.pucData;
-        heightData.pucData = nullptr;
+bool CTERRAIN::unloadHeightMap(){
+    if (m_heightData.s_pucData == nullptr) {
+        delete[] m_heightData.s_pucData;
+        m_heightData.s_pucData = nullptr;
         return true;
     }
     return false;
 }
 
 // Generate the vertex data for the terrain
-void Terrain::generateVertexData() {
-    vertices.clear();
-    colors.clear();
+void CTERRAIN::generateVertexData() {
+    m_vVertices.clear();
+    m_vColors.clear();
 
-    for (int z = 0; z < size - 1; ++z) {
-        for (int x = 0; x < size; ++x) {
+    for (int iZ = 0; iZ < m_iSize - 1; ++iZ) {
+        for (int iX = 0; iX < m_iSize; ++iX) {
             // Vertex 1 (z row)
-            vertices.push_back(x);
-            vertices.push_back(getScaledHeightAtPoint(x, z));
-            vertices.push_back(z);
-            colors.push_back(getTrueHeightAtPoint(x, z) / 255.0f);
-            colors.push_back(getTrueHeightAtPoint(x, z) / 255.0f);
-            colors.push_back(getTrueHeightAtPoint(x, z) / 255.0f);
+            m_vVertices.push_back(iX);
+            m_vVertices.push_back(getScaledHeightAtPoint(iX, iZ));
+            m_vVertices.push_back(iZ);
+            m_vColors.push_back(getTrueHeightAtPoint(iX, iZ) / 255.0f);
+            m_vColors.push_back(getTrueHeightAtPoint(iX, iZ) / 255.0f);
+            m_vColors.push_back(getTrueHeightAtPoint(iX, iZ) / 255.0f);
 
             // Vertex 2 (z+1 row)
-            vertices.push_back(x);
-            vertices.push_back(getScaledHeightAtPoint(x, z + 1));
-            vertices.push_back(z + 1);
-            colors.push_back(getTrueHeightAtPoint(x, z + 1) / 255.0f);
-            colors.push_back(getTrueHeightAtPoint(x, z + 1) / 255.0f);
-            colors.push_back(getTrueHeightAtPoint(x, z + 1) / 255.0f);
+            m_vVertices.push_back(iX);
+            m_vVertices.push_back(getScaledHeightAtPoint(iX, iZ + 1));
+            m_vVertices.push_back(iZ + 1);
+            m_vColors.push_back(getTrueHeightAtPoint(iX, iZ + 1) / 255.0f);
+            m_vColors.push_back(getTrueHeightAtPoint(iX, iZ + 1) / 255.0f);
+            m_vColors.push_back(getTrueHeightAtPoint(iX, iZ + 1) / 255.0f);
         }
     }
 }
 
 // Setup the VAO, VBO, and EBO for the terrain
-void Terrain::setupBuffers() {
+void CTERRAIN::setupBuffers() {
     // Create the VAO, VBO, and EBO
-    terrainVAO = new VAO();
-    terrainVAO->Bind();
+    m_terrainVAO = new CVAO();
+    m_terrainVAO->Bind();
 
-    terrainVBO = new VBO(vertices.data(), vertices.size() * sizeof(float));
-    terrainColorVBO = new VBO(colors.data(), colors.size() * sizeof(float));
+    m_terrainVBO = new CVBO(m_vVertices.data(), m_vVertices.size() * sizeof(float));
+    m_terrainColorVBO = new CVBO(m_vColors.data(), m_vColors.size() * sizeof(float));
 
 
-    terrainVAO->LinkAttrib(*terrainVBO, 0, 3, GL_FLOAT, 0, (void*)0);
-    terrainVAO->LinkAttrib(*terrainColorVBO, 1, 3, GL_FLOAT, 0, (void*)0);
+    m_terrainVAO->LinkAttrib(*m_terrainVBO, 0, 3, GL_FLOAT, 0, (void*)0);
+    m_terrainVAO->LinkAttrib(*m_terrainColorVBO, 1, 3, GL_FLOAT, 0, (void*)0);
 
-    terrainVAO->Unbind();
-    terrainVBO->Unbind();
-    terrainColorVBO->Unbind();
+    m_terrainVAO->Unbind();
+    m_terrainVBO->Unbind();
+    m_terrainColorVBO->Unbind();
 }
 
-void Terrain::setupShader() {
-    terrainShader = new Shader("resources/terrain/terrain.vert", "resources/terrain/terrain.frag");
+void CTERRAIN::setupShader() {
+    m_terrainShader = new CSHADER("resources/terrain/terrain.vert", "resources/terrain/terrain.frag");
 }

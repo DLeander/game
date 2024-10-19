@@ -4,45 +4,45 @@ Texture::Texture(const char* texturePath, GLenum type, GLenum slot, GLenum forma
     // Load the player's texture
 
     // Texture Variables
-    this->type = type;
-    int playerImgWidth, playerImgHeight, playerImgChannels;
+    m_Type = type;
+    int iPlayerImgWidth, iPlayerImgHeight, iPlayerImgChannels;
     stbi_set_flip_vertically_on_load(true);
     unsigned char* playerImgData;
-    playerImgData = stbi_load(texturePath, &playerImgWidth, &playerImgHeight, &playerImgChannels, 0);
+    playerImgData = stbi_load(texturePath, &iPlayerImgWidth, &iPlayerImgHeight, &iPlayerImgChannels, 0);
 
     if (!playerImgData) {
         std::cerr << "Failed to load texture at " << texturePath << "\n";
     }
     
-    glGenTextures(1, &ID);
+    glGenTextures(1, &m_ID);
     glActiveTexture(slot);
-    glBindTexture(type, ID);
+    glBindTexture(type, m_ID);
 
     glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexImage2D(type, 0, GL_RGBA, playerImgWidth, playerImgHeight, 0, format, pixelType, playerImgData);
+    glTexImage2D(type, 0, GL_RGBA, iPlayerImgWidth, iPlayerImgHeight, 0, format, pixelType, playerImgData);
     glGenerateMipmap(type);
 
     stbi_image_free(playerImgData);
     glBindTexture(type, 0);
 }
 
-void Texture::textureUnit(Shader* shader, const char* uniform, GLuint unit){
+void Texture::textureUnit(CSHADER* shader, const char* uniform, GLuint unit){
     shader->Activate();
-    glUniform1i(glGetUniformLocation(shader->ID, uniform), unit);
+    glUniform1i(glGetUniformLocation(shader->m_ID, uniform), unit);
 }
 
 void Texture::Bind(){
-    glBindTexture(type, ID);
+    glBindTexture(m_Type, m_ID);
 }
 
 void Texture::Unbind(){
-    glBindTexture(type, 0);
+    glBindTexture(m_Type, 0);
 }
 
 void Texture::Delete(){
-    glDeleteTextures(1, &ID);
+    glDeleteTextures(1, &m_ID);
 }

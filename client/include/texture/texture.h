@@ -8,15 +8,15 @@
 class Texture {
     public:
         // Variables
-        GLuint ID;
-        GLenum type;
+        GLuint m_ID;
+        GLenum m_Type;
 
-        int width, height, nrChannels;
+        int m_iWidth, m_iHeight, m_iChannels;
 
         // Methods
         Texture(const char* texturePath, GLenum type, GLenum slot, GLenum format, GLenum pixelType);
 
-        void textureUnit(Shader* shader, const char* uniform, GLuint unit);
+        void textureUnit(CSHADER* shader, const char* uniform, GLuint unit);
         void Bind();
         void Unbind();
         void Delete();

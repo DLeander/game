@@ -18,40 +18,40 @@
 #include "objects/EBO.h"
 #include "camera.h"
 
-struct HEIGHT_DATA {
-    unsigned char* pucData; //the height data
-    int size;              //the height size (power of 2)
+struct SHEIGHT_DATA {
+    unsigned char* s_pucData; //the height data
+    int s_iSize;              //the height size (power of 2)
 };
 
-class Terrain {
+class CTERRAIN {
     protected:
-        HEIGHT_DATA heightData; // Height data (Gathered from Heightmap)
-        float heightScale; // Height scale of the terrain
+        SHEIGHT_DATA m_heightData; // Height data (Gathered from Heightmap)
+        float m_fHeightScale; // Height scale of the terrain
 
-        Shader* terrainShader;
-        VAO* terrainVAO;
-        VBO* terrainVBO;
-        VBO* terrainColorVBO;
+        CSHADER* m_terrainShader;
+        CVAO* m_terrainVAO;
+        CVBO* m_terrainVBO;
+        CVBO* m_terrainColorVBO;
         // EBO* terrainEBO;
 
-        std::vector<float> vertices;
-        std::vector<float> colors;
+        std::vector<float> m_vVertices;
+        std::vector<float> m_vColors;
 
     public:
-        int size; // Size of the terrain (Power of 2)
+        int m_iSize; // Size of the terrain (Power of 2)
 
     // Constructor
-    Terrain(){}
+    CTERRAIN(){}
     // Destructor
-    ~Terrain(){unloadHeightMap();}
+    ~CTERRAIN(){unloadHeightMap();}
 
-    virtual void Render( Camera* camera ) = 0;
+    virtual void render( CCAMERA* camera ) = 0;
 
     // Init the terrain
-    void init(const char* filename, int size, float heightScale);
+    void init(const char* filename, int iSize, float fHeightScale);
 
     // Gather information from heightmap file
-    bool loadHeightMap(const char* filename, int size);
+    bool loadHeightMap(const char* filename, int iSize);
     bool saveHeightMap(const char* filename);
     bool unloadHeightMap();
     // Generate the vertex data for the terrain and create the VAO, VBO, and EBO.
@@ -60,11 +60,11 @@ class Terrain {
     void setupBuffers();
 
     // Set the height scaling variable
-    inline void setHeightScale(float scale) { heightScale = scale; }
+    inline void setHeightScale(float fScale) { m_fHeightScale = fScale; }
     // Set the true height value at the given point-ucHeight: the new height value for the point-iX, iZ: which height value to retrieve
-    inline void setHeightAtPoint(unsigned char height, int x, int z) { heightData.pucData[x + z * size] = height; }
+    inline void setHeightAtPoint(unsigned char height, int iX, int iZ) { m_heightData.s_pucData[iX + iZ * m_iSize] = height; }
     // A function to get the true height value (0-255) at a point
-    inline unsigned char getTrueHeightAtPoint(int x, int z) { return heightData.pucData[x + z * size]; }
+    inline unsigned char getTrueHeightAtPoint(int iX, int iZ) { return m_heightData.s_pucData[iX + iZ * m_iSize]; }
     // Retrieve the scaled height at a given point
-    inline float getScaledHeightAtPoint(int x, int z) { return heightData.pucData[x + z * size] * heightScale; }
+    inline float getScaledHeightAtPoint(int iX, int iZ) { return m_heightData.s_pucData[iX + iZ * m_iSize] * m_fHeightScale; }
 };

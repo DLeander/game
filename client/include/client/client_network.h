@@ -14,20 +14,20 @@
 // Custom
 #include "common.h"
 
-class ClientNetwork {
+class CCLIENTNETWORK {
     private:
-        int client_socket;
-        boost::uuids::uuid clientID;
-        struct sockaddr_in server_address;
-        struct sockaddr_in client_address;
+        int m_iClientSocket;
+        boost::uuids::uuid m_uuidClientID;
+        struct sockaddr_in m_sainServerAddress;
+        struct sockaddr_in m_sainClientAddress;
 
     public:
-        ClientNetwork();
-        ~ClientNetwork();
+        CCLIENTNETWORK();
+        ~CCLIENTNETWORK();
         boost::uuids::uuid connect();
         void disconnect();
-        void sendToServer(Package package);
-        Package receiveFromServer();
+        void sendToServer(SPACKAGE package);
+        SPACKAGE receiveFromServer();
 
         // Getters
         // int getClientSocket() { return client_socket; }
