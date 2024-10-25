@@ -75,6 +75,7 @@ void CCLIENT::init(){
     m_camera = new CCAMERA(m_iWindowWidth, m_iWindowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
 
     // Init terrain
+    m_terrain.faultFormation(0, 255, 16, 128, "resources/terrain/heightmap.png");
     m_terrain.init("resources/terrain/heightmap.raw", 128, 0.2f);
 
     // Do wireframe mode

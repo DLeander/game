@@ -95,3 +95,49 @@ void CTERRAIN::setupBuffers() {
 void CTERRAIN::setupShader() {
     m_terrainShader = new CSHADER("resources/terrain/terrain.vert", "resources/terrain/terrain.frag");
 }
+
+// iHeight= iMaxDelta - ( ( iMaxDelta-iMinDelta )*iCurrentIteration)/iIterations;
+
+void CTERRAIN::faultFormation(int iMinDelta, int iMaxDelta, int iIterations, const int iSize, const char* saveLocation) {
+    m_iSize = iSize;
+
+    // Allocate the height map; consider using float for more precision
+    float* cHeightMap = new float[m_iSize * m_iSize];
+    std::memset(cHeightMap, 0, m_iSize * m_iSize * sizeof(float)); // Initialize to zero
+
+    std::srand(static_cast<unsigned int>(time(0))); // Seed the random number generator
+
+    // Generate two random points for iRandX1, iRandX2 and iRandZ1, iRandZ2
+    int iRandX1 = std::rand() % m_iSize;
+    int iRandZ1 = std::rand() % m_iSize;
+    int iRandX2 = std::rand() % m_iSize;
+    int iRandZ2 = std::rand() % m_iSize;
+
+    // Calculate direction vectors
+    int iDirX1 = iRandX2 - iRandX1;
+    int iDirZ1 = iRandZ2 - iRandZ1;
+
+    for (int iCurrentIteration = 1; iCurrentIteration <= iIterations; ++iCurrentIteration) {
+        // Calculate the height for the current iteration
+        int iHeight = iMaxDelta - ((iMaxDelta - iMinDelta) * iCurrentIteration) / iIterations;
+
+        for (int x = 0; x < m_iSize; x++) {
+            for (int z = 0; z < m_iSize; z++) {
+                // Vector to the current point
+                int iDirX2 = x - iRandX2;
+                int iDirZ2 = z - iRandZ2;
+
+                // Check if the point is "above" the fault line
+                if ((iDirX2 * iDirZ1 - iDirX1 * iDirZ2) > 0) {
+                    cHeightMap[z * m_iSize + x] += static_cast<float>(iHeight); // Raise this point by iHeight
+                }
+            }
+        }
+    }
+
+    // Store the heightmap as a PNG file
+    stbi_write_png(saveLocation, m_iSize, m_iSize, 1, cHeightMap, m_iSize * sizeof(float));
+
+    // Clean up
+    delete[] cHeightMap; // Free the allocated memory
+}
