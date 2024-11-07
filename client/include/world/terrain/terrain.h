@@ -20,6 +20,8 @@
 
 #include<stb/stb_image_write.h>
 
+#include <algorithm>
+
 struct SHEIGHT_DATA {
     unsigned char* s_pucData; //the height data
     int s_iSize;              //the height size (power of 2)
@@ -57,6 +59,9 @@ class CTERRAIN {
     bool saveHeightMap(const char* filename);
     bool unloadHeightMap();
     void faultFormation(int iMinDelta, int iMaxDelta, int iIterations, const int iSize, const char* saveLocation);
+    void midPointDisplacement(const int iSize, const char* saveLocation);
+    void filterHeightBand(float* fpBand, int iStride, int iCount, float fFilter, int iPasses);
+
     // Generate the vertex data for the terrain and create the VAO, VBO, and EBO.
     void generateVertexData();
     void setupShader();
