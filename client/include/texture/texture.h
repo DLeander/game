@@ -15,6 +15,7 @@ class Texture {
 
         // Methods
         Texture(const char* texturePath, GLenum type, GLenum slot, GLenum format, GLenum pixelType);
+        Texture(unsigned char* texture, GLenum type, GLenum slot, GLenum format, GLenum pixelType);
 
         void textureUnit(CSHADER* shader, const char* uniform, GLuint unit);
         void Bind();

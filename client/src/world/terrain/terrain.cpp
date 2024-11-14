@@ -15,6 +15,9 @@ void CTERRAIN::init(const char* filename, int size, float fHeightScale){
 
     // Setup the VAO, VBO
     setupBuffers();
+    
+    // Setup the texture
+    setupTexture(createTextureFromHeightMap());
 }
 
 bool CTERRAIN::loadHeightMap(const char* filename, int iSize) {
@@ -55,6 +58,10 @@ void CTERRAIN::generateVertexData() {
 
     for (int iZ = 0; iZ < m_iSize - 1; ++iZ) {
         for (int iX = 0; iX < m_iSize; ++iX) {
+
+            // Textures are stored for x and z, and x and z + 1 (depending no the currently drawn terrain.)
+            // These can be called TextureLeft, TextureBottom, and TextureTop.
+
             // Vertex 1 (z row)
             m_vVertices.push_back(iX);
             m_vVertices.push_back(getScaledHeightAtPoint(iX, iZ));
@@ -62,6 +69,8 @@ void CTERRAIN::generateVertexData() {
             m_vColors.push_back(getTrueHeightAtPoint(iX, iZ) / 255.0f);
             m_vColors.push_back(getTrueHeightAtPoint(iX, iZ) / 255.0f);
             m_vColors.push_back(getTrueHeightAtPoint(iX, iZ) / 255.0f);
+            m_vTexCoords.push_back(static_cast<float>(iX) / (m_iSize)); // textureLeft
+            m_vTexCoords.push_back(static_cast<float>(iZ) / (m_iSize)); // textureBottom
 
             // Vertex 2 (z+1 row)
             m_vVertices.push_back(iX);
@@ -70,6 +79,8 @@ void CTERRAIN::generateVertexData() {
             m_vColors.push_back(getTrueHeightAtPoint(iX, iZ + 1) / 255.0f);
             m_vColors.push_back(getTrueHeightAtPoint(iX, iZ + 1) / 255.0f);
             m_vColors.push_back(getTrueHeightAtPoint(iX, iZ + 1) / 255.0f);
+            m_vTexCoords.push_back(static_cast<float>(iX) / (m_iSize)); // textureLeft
+            m_vTexCoords.push_back(static_cast<float>(iZ + 1) / (m_iSize)); // textureTop
         }
     }
 }
@@ -82,18 +93,53 @@ void CTERRAIN::setupBuffers() {
 
     m_terrainVBO = new CVBO(m_vVertices.data(), m_vVertices.size() * sizeof(float));
     m_terrainColorVBO = new CVBO(m_vColors.data(), m_vColors.size() * sizeof(float));
-
+    m_terrainTexCoordsVBO = new CVBO(m_vTexCoords.data(), m_vTexCoords.size() * sizeof(float));
 
     m_terrainVAO->LinkAttrib(*m_terrainVBO, 0, 3, GL_FLOAT, 0, (void*)0);
     m_terrainVAO->LinkAttrib(*m_terrainColorVBO, 1, 3, GL_FLOAT, 0, (void*)0);
+    m_terrainVAO->LinkAttrib(*m_terrainTexCoordsVBO, 2, 2, GL_FLOAT, 0, (void*)0);
 
     m_terrainVAO->Unbind();
     m_terrainVBO->Unbind();
     m_terrainColorVBO->Unbind();
+    m_terrainTexCoordsVBO->Unbind();
+}
+
+void CTERRAIN::setupTexture() {
+    m_terrainTexture = new Texture("resources/terrain/grasstexture.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
+    m_terrainShader->Activate();
+    m_terrainTexture->textureUnit(m_terrainShader, "texture1", 0);
+}
+
+void CTERRAIN::setupTexture(unsigned char* texture) {
+    m_terrainTexture = new Texture(texture, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
+    m_terrainShader->Activate();
+    m_terrainTexture->textureUnit(m_terrainShader, "texture1", 0);
 }
 
 void CTERRAIN::setupShader() {
     m_terrainShader = new CSHADER("resources/terrain/terrain.vert", "resources/terrain/terrain.frag");
+}
+
+unsigned char* CTERRAIN::createTextureFromHeightMap() {
+    // Define RGB colors for green (low altitude) and gray (high altitude)
+    unsigned char green[3] = {65, 155, 55}; // Grass color
+    unsigned char gray[3] = {81, 81, 81};   // Rock color
+
+    // Allocate memory for the color map
+    unsigned char* cColorMap = new unsigned char[m_iSize * m_iSize * 3];
+
+    for (int i = 0; i < m_iSize * m_iSize; i++) {
+        // Normalize the height value (0 to 1 range)
+        float fHeight = static_cast<float>(m_heightData.s_pucData[i]) / 255.0f;
+        
+        // Interpolate between colors based on height (low = green, high = gray)
+        for (int j = 0; j < 3; j++) {
+            cColorMap[i * 3 + j] = static_cast<unsigned char>(fHeight * gray[j] + (1.0f - fHeight)/2 * green[j]);
+        }
+    }
+
+    return cColorMap;
 }
 
 void CTERRAIN::faultFormation(int iMinDelta, int iMaxDelta, int iIterations, const int iSize, const char* saveLocation) {

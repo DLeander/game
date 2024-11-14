@@ -10,11 +10,10 @@ void CBRUTEFORCE::render(CCAMERA* camera) {
         std::cerr << "Uniform 'camMatrix' not found in shader." << std::endl;
     }
 
+    // Set the model matrix
+    m_terrainTexture->Bind();
     // Bind the VAO that stores vertex and color data
     m_terrainVAO->Bind();
-
-    // Draw the terrain using the vertex data and color data
-    // glDrawArrays(GL_TRIANGLE_STRIP, 0, (vertices.size() / 3));
 
     // Draw each row separately
     for (int iZ = 0; iZ < m_iSize - 1; ++iZ) {

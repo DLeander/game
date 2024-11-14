@@ -16,6 +16,7 @@
 #include "objects/VAO.h"
 #include "objects/VBO.h"
 #include "objects/EBO.h"
+#include "texture/texture.h"
 #include "camera.h"
 
 #include<stb/stb_image_write.h>
@@ -23,9 +24,21 @@
 #include <algorithm>
 
 struct SHEIGHT_DATA {
-    unsigned char* s_pucData; //the height data
+    unsigned char* s_pucData;  //the height data
     int s_iSize;              //the height size (power of 2)
 };
+
+// struct STERRAIN_TEXTURE_REGIONS{
+//     int m_iLowHeight;      // lowest possible height (0%)
+//     int m_iOptimalHeight; // optimal height (100%)
+//     int m_iHighHeight;   // highest possible height (0%)
+// };
+
+// struct STERRAIN_TEXTURE_TILES{
+//     STERRAIN_TEXTURE_REGIONS m_regions[TERRAIN_NUM_TILES]; //texture regions
+//     const char* textureTiles[TERRAIN_NUM_TILES];           //texture tiles
+//     int iNumTiles;
+// };
 
 class CTERRAIN {
     protected:
@@ -36,10 +49,17 @@ class CTERRAIN {
         CVAO* m_terrainVAO;
         CVBO* m_terrainVBO;
         CVBO* m_terrainColorVBO;
+        CVBO* m_terrainTexCoordsVBO;
         // EBO* terrainEBO;
+        Texture* m_terrainTexture;
 
+        // Vertex data for the terrain
         std::vector<float> m_vVertices;
+        // Color data for the terrain
         std::vector<float> m_vColors;
+        // Normalized texture coordinates for the texturing terrain created by m_vVertices.
+        std::vector<float> m_vTexCoords;
+
 
     public:
         int m_iSize; // Size of the terrain (Power of 2)
@@ -58,6 +78,7 @@ class CTERRAIN {
     bool loadHeightMap(const char* filename, int iSize);
     bool saveHeightMap(const char* filename);
     bool unloadHeightMap();
+    unsigned char* createTextureFromHeightMap();
     void faultFormation(int iMinDelta, int iMaxDelta, int iIterations, const int iSize, const char* saveLocation);
     void midPointDisplacement(const int iSize, const char* saveLocation);
     void filterHeightBand(float* fpBand, int iStride, int iCount, float fFilter, int iPasses);
@@ -66,6 +87,8 @@ class CTERRAIN {
     void generateVertexData();
     void setupShader();
     void setupBuffers();
+    void setupTexture();
+    void setupTexture(unsigned char* texture);
 
     // Set the height scaling variable
     inline void setHeightScale(float fScale) { m_fHeightScale = fScale; }
