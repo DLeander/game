@@ -17,7 +17,8 @@ void CTERRAIN::init(const char* filename, int size, float fHeightScale){
     setupBuffers();
     
     // Setup the texture
-    setupTexture(createTextureFromHeightMap());
+    createTextureFromHeightMap();
+    setupTexture(m_ucTextureData);
 }
 
 bool CTERRAIN::loadHeightMap(const char* filename, int iSize) {
@@ -121,25 +122,57 @@ void CTERRAIN::setupShader() {
     m_terrainShader = new CSHADER("resources/terrain/terrain.vert", "resources/terrain/terrain.frag");
 }
 
-unsigned char* CTERRAIN::createTextureFromHeightMap() {
+void CTERRAIN::createTextureFromHeightMap() {
     // Define RGB colors for green (low altitude) and gray (high altitude)
     unsigned char green[3] = {65, 155, 55}; // Grass color
     unsigned char gray[3] = {81, 81, 81};   // Rock color
 
     // Allocate memory for the color map
-    unsigned char* cColorMap = new unsigned char[m_iSize * m_iSize * 3];
+    unsigned char* ucColorMap = new unsigned char[m_iSize * m_iSize * 3];
 
     for (int i = 0; i < m_iSize * m_iSize; i++) {
         // Normalize the height value (0 to 1 range)
         float fHeight = static_cast<float>(m_heightData.s_pucData[i]) / 255.0f;
         
         // Interpolate between colors based on height (low = green, high = gray)
-        for (int j = 0; j < 3; j++) {
-            cColorMap[i * 3 + j] = static_cast<unsigned char>(fHeight * gray[j] + (1.0f - fHeight)/2 * green[j]);
+        unsigned char ucR = static_cast<unsigned char>(fHeight * gray[0] + (1.0f - fHeight)/2 * green[0]);
+        unsigned char ucG = static_cast<unsigned char>(fHeight * gray[1] + (1.0f - fHeight)/2 * green[1]);
+        unsigned char ucB = static_cast<unsigned char>(fHeight * gray[2] + (1.0f - fHeight)/2 * green[2]);
+        if (i*3 < m_iSize * m_iSize * 3){
+            setColorToTexture(ucColorMap, i*3, ucR, ucG, ucB);
         }
     }
 
-    return cColorMap;
+    m_ucTextureData = ucColorMap;
+}
+
+void CTERRAIN::setColorToTexture(unsigned char* ucTexture, int iIndex, unsigned char ucR, unsigned char ucG, unsigned char ucB) {
+    ucTexture[iIndex] = ucR;
+    ucTexture[iIndex + 1] = ucG;
+    ucTexture[iIndex + 2] = ucB;
+}
+
+// Current implementation is slope lightning.
+// This might change to a better lightning later on.
+// This function should be called after setSlopeLightningParams
+// And each time the light should change (aka day/night cycle).
+void CTERRAIN::calculateLightning(){
+    float fShade;
+    for (int z = 0; z < m_iSize; z++){
+        for (int x = 0; x < m_iSize; x++){
+            if(z >= m_iLightDirectionZ && x >= m_iLightDirectionX){
+                //calculate the shading value using the “slope lighting” algorithm
+                fShade= 1.0f-( getTrueHeightAtPoint( x-m_iLightDirectionX, z-m_iLightDirectionZ ) - getTrueHeightAtPoint( x, z ) )/m_fLightSoftness;
+            }else{
+                fShade= 1.0f;
+            }
+
+            if (fShade < m_fMinLightBrightness) fShade = m_fMinLightBrightness;
+            if (fShade > m_fMaxLightBrightness) fShade = m_fMaxLightBrightness;
+            setColorToTexture(m_ucTextureData, (z*m_iSize + x)*3, m_ucTextureData[(z*m_iSize + x)*3]*fShade, m_ucTextureData[(z*m_iSize + x)*3+1]*fShade, m_ucTextureData[(z*m_iSize + x)*3+2]*fShade);
+        }
+    }
+    setupTexture(m_ucTextureData);
 }
 
 void CTERRAIN::faultFormation(int iMinDelta, int iMaxDelta, int iIterations, const int iSize, const char* saveLocation) {

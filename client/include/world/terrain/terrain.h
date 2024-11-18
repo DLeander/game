@@ -28,6 +28,11 @@ struct SHEIGHT_DATA {
     int s_iSize;              //the height size (power of 2)
 };
 
+struct SGEOMM_PATCH {
+    float m_fDistance; // Distance from the camera
+    int m_iLOD;       // Level of detail
+};
+
 // struct STERRAIN_TEXTURE_REGIONS{
 //     int m_iLowHeight;      // lowest possible height (0%)
 //     int m_iOptimalHeight; // optimal height (100%)
@@ -51,7 +56,15 @@ class CTERRAIN {
         CVBO* m_terrainColorVBO;
         CVBO* m_terrainTexCoordsVBO;
         // EBO* terrainEBO;
+        unsigned char* m_ucTextureData;
         Texture* m_terrainTexture;
+
+        // Light variables
+        int m_iLightDirectionX;
+        int m_iLightDirectionZ;
+        float m_fMinLightBrightness;
+        float m_fMaxLightBrightness;
+        float m_fLightSoftness; 
 
         // Vertex data for the terrain
         std::vector<float> m_vVertices;
@@ -78,10 +91,15 @@ class CTERRAIN {
     bool loadHeightMap(const char* filename, int iSize);
     bool saveHeightMap(const char* filename);
     bool unloadHeightMap();
-    unsigned char* createTextureFromHeightMap();
+    void createTextureFromHeightMap();
+    void setColorToTexture(unsigned char* texture, int index, unsigned char R, unsigned char G, unsigned char B);
     void faultFormation(int iMinDelta, int iMaxDelta, int iIterations, const int iSize, const char* saveLocation);
     void midPointDisplacement(const int iSize, const char* saveLocation);
     void filterHeightBand(float* fpBand, int iStride, int iCount, float fFilter, int iPasses);
+
+    // Texture lightning
+    inline void setSlopeLightingParams( int iDirX, int iDirZ, float fMinBrightness, float fMaxBrightness, float fSoftness ){ m_iLightDirectionX = iDirX; m_iLightDirectionZ = iDirZ; m_fMinLightBrightness = fMinBrightness;  m_fMaxLightBrightness = fMaxBrightness; m_fLightSoftness = fSoftness; }
+    void calculateLightning();
 
     // Generate the vertex data for the terrain and create the VAO, VBO, and EBO.
     void generateVertexData();

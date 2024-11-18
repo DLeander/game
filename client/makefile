@@ -16,7 +16,10 @@ CPP_OBJS = $(CPP_SRCS:.cpp=.o)
 C_OBJS = $(C_SRCS:.c=.o)
 
 # Libraries
-LDFLAGS = -lglfw -ldl -lGL
+# For linus use -lglfw -ldl -lGL
+# For mac use -lglfw -framework OpenGL
+#LDFLAGS = -lglfw -ldl -lGL
+LDFLAGS = -lglfw -framework OpenGL
 
 # Output executable
 TARGET = run
