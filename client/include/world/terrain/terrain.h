@@ -23,16 +23,6 @@
 
 #include <algorithm>
 
-struct SHEIGHT_DATA {
-    unsigned char* s_pucData;  //the height data
-    int s_iSize;              //the height size (power of 2)
-};
-
-struct SGEOMM_PATCH {
-    float m_fDistance; // Distance from the camera
-    int m_iLOD;       // Level of detail
-};
-
 // struct STERRAIN_TEXTURE_REGIONS{
 //     int m_iLowHeight;      // lowest possible height (0%)
 //     int m_iOptimalHeight; // optimal height (100%)
@@ -47,6 +37,11 @@ struct SGEOMM_PATCH {
 
 class CTERRAIN {
     protected:
+        struct SHEIGHT_DATA {
+            unsigned char* s_pucData;  //the height data
+            int s_iSize;              //the height size (power of 2)
+        };
+
         SHEIGHT_DATA m_heightData; // Height data (Gathered from Heightmap)
         float m_fHeightScale; // Height scale of the terrain
 
@@ -104,9 +99,9 @@ class CTERRAIN {
     // Generate the vertex data for the terrain and create the VAO, VBO, and EBO.
     void generateVertexData();
     void setupShader();
-    void setupBuffers();
+    // void setupBuffers();
+    void setupTexture(const char* filename);
     void setupTexture();
-    void setupTexture(unsigned char* texture);
 
     // Set the height scaling variable
     inline void setHeightScale(float fScale) { m_fHeightScale = fScale; }

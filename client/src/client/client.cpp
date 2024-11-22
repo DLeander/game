@@ -77,8 +77,11 @@ void CCLIENT::init(){
     // Init terrain
     // int iHeightMapHW = 128;
     // m_terrain.faultFormation(0, 255, 32, iHeightMapHW + 32, "resources/terrain/heightmap.png");
-    m_terrain.midPointDisplacement(128, "resources/terrain/heightmap.png");
-    m_terrain.init("resources/terrain/heightmap.raw", 128, 0.2f);
+    // m_terrain.midPointDisplacement(128, "resources/terrain/heightmap.png");
+
+    m_terrain.init("resources/terrain/heightmap_512.raw", 512, 0.5f);
+    m_terrain.setupBuffers();
+
     // The different x and z directions we can have in slope lightning is
     // 1, 1 (45 degrees), 1, 0 (90 degrees), 1, -1 (135 degrees), 0, -1 (180 degrees), -1, -1 (225 degrees), -1, 0 (270 degrees), -1, 1 (315 degrees), 0, 1 (360 degrees)
     // The sun will always move in 45 degree increments, so the day/night cycle should only recalculate the lightning every "45 degrees" of suntime.
@@ -175,7 +178,7 @@ void CCLIENT::receivePlayersInfo(){
 
 // Render the client.
 void CCLIENT::render() {
-
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     renderWorld();
 
     m_player->keyboard_input(m_window);

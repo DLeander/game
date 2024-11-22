@@ -34,6 +34,7 @@
 #include "camera.h"
 #include "terrain.h"
 #include "bruteforce.h"
+#include "geomipmap.h"
 
 namespace std {
     template <>
@@ -70,7 +71,7 @@ class CCLIENT{
         boost::uuids::uuid m_uuidClientID;
         CPLAYER* m_player;
         std::unordered_map<boost::uuids::uuid, CPLAYER*> m_umOtherPlayers;
-        CBRUTEFORCE m_terrain;
+        CGEOMIPMAP m_terrain;
         CCAMERA* m_camera;
 
         // Methods

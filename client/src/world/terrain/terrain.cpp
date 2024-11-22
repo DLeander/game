@@ -6,19 +6,27 @@ void CTERRAIN::init(const char* filename, int size, float fHeightScale){
 
     // Load the height map
     loadHeightMap(filename, size);
+    std::cout << "Heightmap loaded" << std::endl;
 
     // Generate vertex and color data
     generateVertexData();
+    std::cout << "Vertex and color data generated" << std::endl;
 
     // Setup the shader
     setupShader();
+    std::cout << "Shader setup" << std::endl;
 
     // Setup the VAO, VBO
-    setupBuffers();
-    
+    // setupBuffers();
+    // std::cout << "Buffers setup" << std::endl;
+
     // Setup the texture
     createTextureFromHeightMap();
-    setupTexture(m_ucTextureData);
+    std::cout << "Texture created" << std::endl;
+    setupTexture();
+    std::cout << "Texture setup" << std::endl;
+
+    std::cout << "Terrain initialized" << std::endl;
 }
 
 bool CTERRAIN::loadHeightMap(const char* filename, int iSize) {
@@ -28,7 +36,6 @@ bool CTERRAIN::loadHeightMap(const char* filename, int iSize) {
         unloadHeightMap();
     }
     m_heightData.s_pucData = new unsigned char[iSize * iSize];
-    std::cout << "Heightmap size: " << iSize << std::endl;
     if (m_heightData.s_pucData == nullptr) {
         std::cerr << "Could not allocate memory for height data" << std::endl;
         return false;
@@ -39,7 +46,6 @@ bool CTERRAIN::loadHeightMap(const char* filename, int iSize) {
     m_iSize = iSize;
     m_heightData.s_iSize= iSize;
 
-    std::cout << "Heightmap loaded" << std::endl;
     return true;
 }
 
@@ -59,7 +65,7 @@ void CTERRAIN::generateVertexData() {
 
     for (int iZ = 0; iZ < m_iSize - 1; ++iZ) {
         for (int iX = 0; iX < m_iSize; ++iX) {
-
+            
             // Textures are stored for x and z, and x and z + 1 (depending no the currently drawn terrain.)
             // These can be called TextureLeft, TextureBottom, and TextureTop.
 
@@ -87,33 +93,33 @@ void CTERRAIN::generateVertexData() {
 }
 
 // Setup the VAO, VBO, and EBO for the terrain
-void CTERRAIN::setupBuffers() {
-    // Create the VAO, VBO, and EBO
-    m_terrainVAO = new CVAO();
-    m_terrainVAO->Bind();
+// void CTERRAIN::setupBuffers() {
+//     // Create the VAO, VBO, and EBO
+//     m_terrainVAO = new CVAO();
+//     m_terrainVAO->Bind();
 
-    m_terrainVBO = new CVBO(m_vVertices.data(), m_vVertices.size() * sizeof(float));
-    m_terrainColorVBO = new CVBO(m_vColors.data(), m_vColors.size() * sizeof(float));
-    m_terrainTexCoordsVBO = new CVBO(m_vTexCoords.data(), m_vTexCoords.size() * sizeof(float));
+//     m_terrainVBO = new CVBO(m_vVertices.data(), m_vVertices.size() * sizeof(float));
+//     m_terrainColorVBO = new CVBO(m_vColors.data(), m_vColors.size() * sizeof(float));
+//     m_terrainTexCoordsVBO = new CVBO(m_vTexCoords.data(), m_vTexCoords.size() * sizeof(float));
 
-    m_terrainVAO->LinkAttrib(*m_terrainVBO, 0, 3, GL_FLOAT, 0, (void*)0);
-    m_terrainVAO->LinkAttrib(*m_terrainColorVBO, 1, 3, GL_FLOAT, 0, (void*)0);
-    m_terrainVAO->LinkAttrib(*m_terrainTexCoordsVBO, 2, 2, GL_FLOAT, 0, (void*)0);
+//     m_terrainVAO->LinkAttrib(*m_terrainVBO, 0, 3, GL_FLOAT, 0, (void*)0);
+//     m_terrainVAO->LinkAttrib(*m_terrainColorVBO, 1, 3, GL_FLOAT, 0, (void*)0);
+//     m_terrainVAO->LinkAttrib(*m_terrainTexCoordsVBO, 2, 2, GL_FLOAT, 0, (void*)0);
 
-    m_terrainVAO->Unbind();
-    m_terrainVBO->Unbind();
-    m_terrainColorVBO->Unbind();
-    m_terrainTexCoordsVBO->Unbind();
-}
+//     m_terrainVAO->Unbind();
+//     m_terrainVBO->Unbind();
+//     m_terrainColorVBO->Unbind();
+//     m_terrainTexCoordsVBO->Unbind();
+// }
 
-void CTERRAIN::setupTexture() {
-    m_terrainTexture = new Texture("resources/terrain/grasstexture.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
+void CTERRAIN::setupTexture(const char* filename) {
+    m_terrainTexture = new Texture(filename, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
     m_terrainShader->Activate();
     m_terrainTexture->textureUnit(m_terrainShader, "texture1", 0);
 }
 
-void CTERRAIN::setupTexture(unsigned char* texture) {
-    m_terrainTexture = new Texture(texture, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
+void CTERRAIN::setupTexture() {
+    m_terrainTexture = new Texture(m_ucTextureData, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE, m_iSize, m_iSize);
     m_terrainShader->Activate();
     m_terrainTexture->textureUnit(m_terrainShader, "texture1", 0);
 }
@@ -122,6 +128,7 @@ void CTERRAIN::setupShader() {
     m_terrainShader = new CSHADER("resources/terrain/terrain.vert", "resources/terrain/terrain.frag");
 }
 
+// Make this patch-wise if it looks weird.
 void CTERRAIN::createTextureFromHeightMap() {
     // Define RGB colors for green (low altitude) and gray (high altitude)
     unsigned char green[3] = {65, 155, 55}; // Grass color
@@ -172,7 +179,7 @@ void CTERRAIN::calculateLightning(){
             setColorToTexture(m_ucTextureData, (z*m_iSize + x)*3, m_ucTextureData[(z*m_iSize + x)*3]*fShade, m_ucTextureData[(z*m_iSize + x)*3+1]*fShade, m_ucTextureData[(z*m_iSize + x)*3+2]*fShade);
         }
     }
-    setupTexture(m_ucTextureData);
+    setupTexture();
 }
 
 void CTERRAIN::faultFormation(int iMinDelta, int iMaxDelta, int iIterations, const int iSize, const char* saveLocation) {
