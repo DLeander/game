@@ -97,10 +97,10 @@ void CGEOMIPMAP::setupBuffers() {
     // LOD 0 (Full resolution)
     for (int i = 0; i < m_iPatchSize - 1; i++) {
         for (int j = 0; j < m_iPatchSize - 1; j++) {
-            int iTopLeft = i * m_iPatchSize + j;
-            int iTopRight = i * m_iPatchSize + (j + 1);
-            int iBottomLeft = (i + 1) * m_iPatchSize + j;
-            int iBottomRight = (i + 1) * m_iPatchSize + (j + 1);
+            int iTopLeft = i * (m_iPatchSize) + j;
+            int iTopRight = i * (m_iPatchSize) + (j + 1);
+            int iBottomLeft = (i + 1) * (m_iPatchSize) + j;
+            int iBottomRight = (i + 1) * (m_iPatchSize) + (j + 1);
 
             m_vIndicesLOD0.push_back(iTopLeft);
             m_vIndicesLOD0.push_back(iBottomLeft);
@@ -112,14 +112,23 @@ void CGEOMIPMAP::setupBuffers() {
     }
 
     // LOD 1 (Half resolution)
-    for (int i = 0; i < m_iPatchSize; i += 2) {  // Skip every other row
-        for (int j = 0; j < m_iPatchSize; j += 2) {  // Skip every other column
-            // Map to full-resolution grid
+    for (int i = 0; i < m_iPatchSize; i += 2) {
+        for (int j = 0; j < m_iPatchSize; j += 2) {
             int iTopLeft = i * m_iPatchSize + j;
-            int iTopRight = i * m_iPatchSize + (j + 2);
-            int iBottomLeft = (i + 2) * m_iPatchSize + j;
-            int iBottomRight = (i + 2) * m_iPatchSize + (j + 2);
+            int iTopRight = i * m_iPatchSize + std::min(j + 2, m_iPatchSize - 1); // Prevent out-of-bounds
+            int iBottomLeft = std::min(i + 2, m_iPatchSize - 1) * m_iPatchSize + j;
+            int iBottomRight = std::min(i + 2, m_iPatchSize - 1) * m_iPatchSize + std::min(j + 2, m_iPatchSize - 1);
 
+            // Avoid pushing indices out of bounds
+            if (iTopLeft >= m_iPatchSize * m_iPatchSize || 
+                iTopRight >= m_iPatchSize * m_iPatchSize || 
+                iBottomLeft >= m_iPatchSize * m_iPatchSize || 
+                iBottomRight >= m_iPatchSize * m_iPatchSize) {
+                std::cout << "Out of bounds: i=" << i << " j=" << j << std::endl;
+                continue;
+            }
+
+            // Push the triangle indices
             m_vIndicesLOD1.push_back(iTopLeft);
             m_vIndicesLOD1.push_back(iBottomLeft);
             m_vIndicesLOD1.push_back(iTopRight);
@@ -131,16 +140,27 @@ void CGEOMIPMAP::setupBuffers() {
     }
 
     // LOD 2 (Quarter resolution)
-    for (int i = 0; i < m_iPatchSize / 4 - 1; i++) {  // Iterate through a quarter of the vertices
-        for (int j = 0; j < m_iPatchSize / 4 - 1; j++) {
-            int iTopLeft = (i * 4) * m_iPatchSize + (j * 4);  // Skip every 4th vertex
-            int iTopRight = (i * 4) * m_iPatchSize + ((j + 1) * 4);
-            int iBottomLeft = ((i + 1) * 4) * m_iPatchSize + (j * 4);
-            int iBottomRight = ((i + 1) * 4) * m_iPatchSize + ((j + 1) * 4);
+    for (int i = 0; i < m_iPatchSize; i += 4) {
+        for (int j = 0; j < m_iPatchSize; j += 4) {
+            int iTopLeft = i * m_iPatchSize + j;
+            int iTopRight = i * m_iPatchSize + std::min(j + 4, m_iPatchSize - 1); // Prevent out-of-bounds
+            int iBottomLeft = std::min(i + 4, m_iPatchSize - 1) * m_iPatchSize + j;
+            int iBottomRight = std::min(i + 4, m_iPatchSize - 1) * m_iPatchSize + std::min(j + 4, m_iPatchSize - 1);
 
+            // Avoid pushing indices out of bounds
+            if (iTopLeft >= m_iPatchSize * m_iPatchSize || 
+                iTopRight >= m_iPatchSize * m_iPatchSize || 
+                iBottomLeft >= m_iPatchSize * m_iPatchSize || 
+                iBottomRight >= m_iPatchSize * m_iPatchSize) {
+                std::cout << "Out of bounds: i=" << i << " j=" << j << std::endl;
+                continue;
+            }
+
+            // Push the triangle indices
             m_vIndicesLOD2.push_back(iTopLeft);
             m_vIndicesLOD2.push_back(iBottomLeft);
             m_vIndicesLOD2.push_back(iTopRight);
+
             m_vIndicesLOD2.push_back(iTopRight);
             m_vIndicesLOD2.push_back(iBottomLeft);
             m_vIndicesLOD2.push_back(iBottomRight);
@@ -148,21 +168,30 @@ void CGEOMIPMAP::setupBuffers() {
     }
 
     // LOD 3 (Eighth resolution)
-    for (int i = 0; i < m_iPatchSize / 8 - 1; i++) {  // Iterate through an eighth of the vertices
-        for (int j = 0; j < m_iPatchSize / 8 - 1; j++) {
-            int iTopLeft = (i * 8) * m_iPatchSize + (j * 8);  // Skip every 8th vertex
-            int iTopRight = (i * 8) * m_iPatchSize + ((j + 1) * 8);
-            int iBottomLeft = ((i + 1) * 8) * m_iPatchSize + (j * 8);
-            int iBottomRight = ((i + 1) * 8) * m_iPatchSize + ((j + 1) * 8);
+    for (int i = 0; i < m_iPatchSize; i += 8) {
+        for (int j = 0; j < m_iPatchSize; j += 8) {
+            int iTopLeft = i * m_iPatchSize + j;
+            int iTopRight = i * m_iPatchSize + std::min(j + 8, m_iPatchSize - 1); // Prevent out-of-bounds
+            int iBottomLeft = std::min(i + 8, m_iPatchSize - 1) * m_iPatchSize + j;
+            int iBottomRight = std::min(i + 8, m_iPatchSize - 1) * m_iPatchSize + std::min(j + 8, m_iPatchSize - 1);
 
+            // Avoid pushing indices out of bounds
+            if (iTopLeft >= m_iPatchSize * m_iPatchSize || 
+                iTopRight >= m_iPatchSize * m_iPatchSize || 
+                iBottomLeft >= m_iPatchSize * m_iPatchSize || 
+                iBottomRight >= m_iPatchSize * m_iPatchSize) {
+                std::cout << "Out of bounds: i=" << i << " j=" << j << std::endl;
+                continue;
+            }
+
+            // Push the triangle indices
             m_vIndicesLOD3.push_back(iTopLeft);
             m_vIndicesLOD3.push_back(iBottomLeft);
             m_vIndicesLOD3.push_back(iTopRight);
+
             m_vIndicesLOD3.push_back(iTopRight);
             m_vIndicesLOD3.push_back(iBottomLeft);
             m_vIndicesLOD3.push_back(iBottomRight);
-
-            // Check for out-of-bounds indices
         }
     }
     // Create the EBOs for each LOD
@@ -182,10 +211,10 @@ void CGEOMIPMAP::update(CCAMERA* camera){
             float fDistance = glm::distance(camera->m_v3Position, v3CurrPatch);
             // Compute LOD
             int iLOD = 0;
-            if(fDistance > 3000){
+            if(fDistance > 700){
                 iLOD = 2;
             }
-            else if(fDistance > 1500){
+            else if(fDistance > 500){
                 iLOD = 2;
             }
             else if(fDistance > 300){

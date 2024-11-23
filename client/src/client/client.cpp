@@ -89,7 +89,7 @@ void CCLIENT::init(){
     m_terrain.calculateLightning();
 
     // Do wireframe mode
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 // Start the client game loop.
@@ -178,7 +178,7 @@ void CCLIENT::receivePlayersInfo(){
 
 // Render the client.
 void CCLIENT::render() {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     renderWorld();
 
     m_player->keyboard_input(m_window);
