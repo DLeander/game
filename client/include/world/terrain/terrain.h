@@ -75,9 +75,11 @@ class CTERRAIN {
     // Constructor
     CTERRAIN(){}
     // Destructor
-    ~CTERRAIN(){unloadHeightMap();}
+    ~CTERRAIN();
 
     virtual void render( CCAMERA* camera ) = 0;
+    virtual void setupBuffers() = 0;
+    virtual void createTextureFromHeightMap() = 0;
 
     // Init the terrain
     void init(const char* filename, int iSize, float fHeightScale);
@@ -86,7 +88,6 @@ class CTERRAIN {
     bool loadHeightMap(const char* filename, int iSize);
     bool saveHeightMap(const char* filename);
     bool unloadHeightMap();
-    void createTextureFromHeightMap();
     void setColorToTexture(unsigned char* texture, int index, unsigned char R, unsigned char G, unsigned char B);
     void faultFormation(int iMinDelta, int iMaxDelta, int iIterations, const int iSize, const char* saveLocation);
     void midPointDisplacement(const int iSize, const char* saveLocation);
@@ -96,8 +97,6 @@ class CTERRAIN {
     inline void setSlopeLightingParams( int iDirX, int iDirZ, float fMinBrightness, float fMaxBrightness, float fSoftness ){ m_iLightDirectionX = iDirX; m_iLightDirectionZ = iDirZ; m_fMinLightBrightness = fMinBrightness;  m_fMaxLightBrightness = fMaxBrightness; m_fLightSoftness = fSoftness; }
     void calculateLightning();
 
-    // Generate the vertex data for the terrain and create the VAO, VBO, and EBO.
-    void generateVertexData();
     void setupShader();
     // void setupBuffers();
     void setupTexture(const char* filename);

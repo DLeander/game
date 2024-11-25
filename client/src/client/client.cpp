@@ -87,9 +87,6 @@ void CCLIENT::init(){
     // The sun will always move in 45 degree increments, so the day/night cycle should only recalculate the lightning every "45 degrees" of suntime.
     m_terrain.setSlopeLightingParams(1, 1, 0.1f, 1.0f, 15.0f);
     m_terrain.calculateLightning();
-
-    // Do wireframe mode
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
 // Start the client game loop.
@@ -178,7 +175,9 @@ void CCLIENT::receivePlayersInfo(){
 
 // Render the client.
 void CCLIENT::render() {
+    // Render with wireframe
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     renderWorld();
 
     m_player->keyboard_input(m_window);
@@ -202,6 +201,13 @@ void CCLIENT::scroll_callback(GLFWwindow* window, double xoffset, double yoffset
 void CCLIENT::key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+
+    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    if (key == GLFW_KEY_H && action == GLFW_PRESS) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     }
 
 }

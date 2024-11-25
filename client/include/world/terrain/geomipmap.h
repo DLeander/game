@@ -16,8 +16,11 @@ public:
         float m_fDistance; // Distance from the camera
         int m_iLOD;       // Level of detail
         std::vector<float> m_vVertices; // Vertices
+        std::vector<float> m_vTexCoords; // Texture coordinates
         CVBO* m_VBOP;       // Vertex Buffer Object
-        CVAO* m_VAOP;       // Vertex Array Object
+        CVBO* m_VBOPD;     // Vertex Buffer Object for dynamic updates
+        CVBO* m_VBOPT;    // Vertex Buffer Object for texture coordinates
+        CVAO* m_VAOP;    // Vertex Array Object
 
         SGEOMM_PATCH() : m_fDistance(0.0f), m_iLOD(0) {}
     };
@@ -41,11 +44,10 @@ public:
 
     // Implement the Render method from Terrain
     void render(CCAMERA* camera) override;
+    void setupBuffers() override;
+    void createTextureFromHeightMap() override;
     void update(CCAMERA* camera);
-    void setupBuffers();
-    void renderPatch();
-    void renderFan();
-    void renderVertex();
+    // void setupBuffers();
 
 private:
     SGEOMM_PATCH* m_pPatches;

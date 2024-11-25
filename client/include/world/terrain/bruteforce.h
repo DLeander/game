@@ -18,4 +18,6 @@ public:
 
     // Implement the Render method from Terrain
     void render(CCAMERA* camera) override;
+    void setupBuffers() override;
+    void createTextureFromHeightMap() override;
 };

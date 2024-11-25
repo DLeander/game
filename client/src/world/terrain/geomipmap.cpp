@@ -48,44 +48,79 @@ void CGEOMIPMAP::render(CCAMERA* camera) {
     }
 }
 
+void CGEOMIPMAP::update(CCAMERA* camera){
+    for(int z = 0; z < m_iNumPatchesPerSide; z++){
+        for(int x = 0; x < m_iNumPatchesPerSide; x++){
+            glm::vec3 v3CurrPatch = glm::vec3(x*m_iPatchSize + m_iPatchSize/2, 0, z*m_iPatchSize + m_iPatchSize/2);
+            // Compute distance from camera
+            float fDistance = glm::distance(camera->m_v3Position, v3CurrPatch);
+            // Compute LOD
+            int iLOD = 0;
+            if(fDistance > 700){
+                iLOD = 2;
+            }
+            else if(fDistance > 500){
+                iLOD = 2;
+            }
+            else if(fDistance > 300){
+                iLOD = 1;
+            }
+            else{
+                iLOD = 0;
+            }
+            // Update patch
+            m_pPatches[z*m_iNumPatchesPerSide + x].m_fDistance = fDistance;
+            m_pPatches[z*m_iNumPatchesPerSide + x].m_iLOD = iLOD;
+        }
+    }
+}
+
 void CGEOMIPMAP::setupBuffers() {
     // Setup EBOs for each LOD (CALL ONCE)
     // For each patch, go through its vertices and create an index buffer
+    m_vTexCoords.clear();
     for (int z = 0; z < m_iNumPatchesPerSide; z++) {
         for (int x = 0; x < m_iNumPatchesPerSide; x++) {
             // Get the current patch and compute its vertices.
             SGEOMM_PATCH* pCurr = &m_pPatches[z * m_iNumPatchesPerSide + x];
             pCurr->m_vVertices.resize(m_iPatchSize * m_iPatchSize * 3); // Pre-allocate memory
+            // pCurr->m_vTexCoords.resize(m_iPatchSize * m_iPatchSize * 2); // Pre-allocate memory
+
             
             // Compute the vertices
             for (int i = 0; i < m_iPatchSize; i++) {
                 for (int j = 0; j < m_iPatchSize; j++) {
                     // Compute the vertices
-                    float fX = x * (m_iPatchSize - 1) + j; // Ensure overlap
+                    float fX = x * (m_iPatchSize - 1) + j; // Ensure overlap (If we have 16, we need 15 as 15 + max(j) will be 16, otherwise we are out of bounds and cracks will occur.)
                     float fZ = z * (m_iPatchSize - 1) + i;
-                    float fY = getTrueHeightAtPoint(fX, fZ); // Might need to divide by 255.0f here...
+                    float fY = getTrueHeightAtPoint(fX, fZ);
                     
                     // Index to place the vertex in the vector
                     int index = (i * m_iPatchSize + j) * 3; // 3 components per vertex
                     pCurr->m_vVertices[index]     = fX; // X coordinate
                     pCurr->m_vVertices[index + 1] = fY; // Y coordinate
                     pCurr->m_vVertices[index + 2] = fZ; // Z coordinate
+
+                    pCurr->m_vTexCoords.push_back(static_cast<float>(fX) / (m_iSize)); // textureLeft
+                    pCurr->m_vTexCoords.push_back(static_cast<float>(fZ) / (m_iSize)); // textureBottom
                 }
             }
             pCurr->m_VAOP = new CVAO();
             pCurr->m_VAOP->Bind();
             pCurr->m_VBOP = new CVBO(pCurr->m_vVertices.data(), pCurr->m_vVertices.size() * sizeof(float));
             pCurr->m_VBOP->Bind();
+            pCurr->m_VBOPT = new CVBO(pCurr->m_vTexCoords.data(), pCurr->m_vTexCoords.size() * sizeof(float));
+            pCurr->m_VBOPT->Bind();
             // Link the vertices and the texture coordinates to the VAO of the patch.
             pCurr->m_VAOP->LinkAttrib(*pCurr->m_VBOP, 0, 3, GL_FLOAT, 0, (void*)0);
-            // pCurr->m_VAOP->LinkAttrib(*m_terrainColorVBO, 1, 3, GL_FLOAT, 0, (void*)0);
-            // pCurr->m_VAOP->LinkAttrib(*m_terrainTexCoordsVBO, 2, 3, GL_FLOAT, 0, (void*)0);
+            pCurr->m_VAOP->LinkAttrib(*pCurr->m_VBOPT, 2, 2, GL_FLOAT, 0, (void*)0);
 
             pCurr->m_VAOP->Unbind();
             pCurr->m_VBOP->Unbind();
+            pCurr->m_VBOPT->Unbind();
         }
     }
-
+    
     // Create the different indices for each LOD.
     // *--------*
     // |      / |
@@ -95,12 +130,12 @@ void CGEOMIPMAP::setupBuffers() {
 
     // We loop from 0 to m_iPatchSize-1 as we always need to have a triangle setup.
     // LOD 0 (Full resolution)
-    for (int i = 0; i < m_iPatchSize - 1; i++) {
-        for (int j = 0; j < m_iPatchSize - 1; j++) {
+    for (int i = 0; i < m_iPatchSize; i++) {
+        for (int j = 0; j < m_iPatchSize; j++) {
             int iTopLeft = i * (m_iPatchSize) + j;
-            int iTopRight = i * (m_iPatchSize) + (j + 1);
-            int iBottomLeft = (i + 1) * (m_iPatchSize) + j;
-            int iBottomRight = (i + 1) * (m_iPatchSize) + (j + 1);
+            int iTopRight = i * (m_iPatchSize) + std::min(j + 1, m_iPatchSize - 1);
+            int iBottomLeft = std::min(i + 1, m_iPatchSize - 1) * (m_iPatchSize) + j;
+            int iBottomRight = std::min(i + 1, m_iPatchSize - 1) * (m_iPatchSize) + std::min(j + 1, m_iPatchSize - 1);
 
             m_vIndicesLOD0.push_back(iTopLeft);
             m_vIndicesLOD0.push_back(iBottomLeft);
@@ -203,31 +238,28 @@ void CGEOMIPMAP::setupBuffers() {
     std::cout << "Buffers setup" << std::endl;
 }
 
-void CGEOMIPMAP::update(CCAMERA* camera){
-    for(int z = 0; z < m_iNumPatchesPerSide; z++){
-        for(int x = 0; x < m_iNumPatchesPerSide; x++){
-            glm::vec3 v3CurrPatch = glm::vec3(x*m_iPatchSize + m_iPatchSize/2, 0, z*m_iPatchSize + m_iPatchSize/2);
-            // Compute distance from camera
-            float fDistance = glm::distance(camera->m_v3Position, v3CurrPatch);
-            // Compute LOD
-            int iLOD = 0;
-            if(fDistance > 700){
-                iLOD = 2;
-            }
-            else if(fDistance > 500){
-                iLOD = 2;
-            }
-            else if(fDistance > 300){
-                iLOD = 1;
-            }
-            else{
-                iLOD = 0;
-            }
-            // Update patch
-            m_pPatches[z*m_iNumPatchesPerSide + x].m_fDistance = fDistance;
-            m_pPatches[z*m_iNumPatchesPerSide + x].m_iLOD = iLOD;
+void CGEOMIPMAP::createTextureFromHeightMap() {
+    // Define RGB colors for green (low altitude) and gray (high altitude)
+    unsigned char green[3] = {65, 155, 55}; // Grass color
+    unsigned char gray[3] = {81, 81, 81};   // Rock color
+
+    // Allocate memory for the color map
+    unsigned char* ucColorMap = new unsigned char[m_iSize * m_iSize * 3];
+
+    for (int i = 0; i < m_iSize * m_iSize; i++) {
+        // Normalize the height value (0 to 1 range)
+        float fHeight = static_cast<float>(m_heightData.s_pucData[i]) / 255.0f;
+        
+        // Interpolate between colors based on height (low = green, high = gray)
+        unsigned char ucR = static_cast<unsigned char>(fHeight * gray[0] + (1.0f - fHeight)/2 * green[0]);
+        unsigned char ucG = static_cast<unsigned char>(fHeight * gray[1] + (1.0f - fHeight)/2 * green[1]);
+        unsigned char ucB = static_cast<unsigned char>(fHeight * gray[2] + (1.0f - fHeight)/2 * green[2]);
+        if (i*3 < m_iSize * m_iSize * 3){
+            setColorToTexture(ucColorMap, i*3, ucR, ucG, ucB);
         }
     }
+
+    m_ucTextureData = ucColorMap;
 }
 
 CGEOMIPMAP::~CGEOMIPMAP(){
@@ -240,5 +272,5 @@ CGEOMIPMAP::~CGEOMIPMAP(){
     delete m_EBOPLOD1;
     delete m_EBOPLOD2;
     delete m_EBOPLOD3;
-    delete m_EBOPDynamic;
+    // delete m_EBOPDynamic;
 }
