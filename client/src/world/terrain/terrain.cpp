@@ -2,14 +2,13 @@
 
 CTERRAIN::~CTERRAIN(){
     unloadHeightMap();
-    if (m_terrainShader) delete m_terrainShader;
-    if (m_terrainVAO) delete m_terrainVAO;
-    if (m_terrainVBO) delete m_terrainVBO;
-    if (m_terrainColorVBO) delete m_terrainColorVBO;
-    if (m_terrainTexCoordsVBO) delete m_terrainTexCoordsVBO;
-    if (m_terrainTexture) delete m_terrainTexture;
-    if (m_ucTextureData) delete[] m_ucTextureData;
-    if (m_heightData.s_pucData) delete[] m_heightData.s_pucData;
+    if (m_terrainShader){delete m_terrainShader; m_terrainShader = nullptr;}
+    if (m_terrainVAO){delete m_terrainVAO; m_terrainVAO = nullptr;}
+    if (m_terrainVBO){delete m_terrainVBO; m_terrainVBO = nullptr;}
+    if (m_terrainColorVBO){delete m_terrainColorVBO; m_terrainColorVBO = nullptr;}
+    if (m_terrainTexCoordsVBO){delete m_terrainTexCoordsVBO; m_terrainTexCoordsVBO = nullptr;}
+    if (m_terrainTexture){delete m_terrainTexture; m_terrainTexture = nullptr;}
+    if (m_ucTextureData){delete[] m_ucTextureData; m_ucTextureData = nullptr;}
 }
 
 void CTERRAIN::init(const char* filename, int size, float fHeightScale){

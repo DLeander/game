@@ -27,6 +27,8 @@ class CSHADER
         // Methods
         CSHADER();
         CSHADER(const char *vertexPath, const char *fragmentPath);
+        // ~CSHADER(){Delete();};
+        ~CSHADER(){};
         void Activate();
         void Delete();
     private:

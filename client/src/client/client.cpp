@@ -67,6 +67,10 @@ void CCLIENT::init(){
 	glViewport(0, 0, m_iWindowWidth, m_iWindowHeight);
     // Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
     // Init player shader
     m_playerShader = new CSHADER("resources/shaders/default.vert", "resources/shaders/default.frag");
     
@@ -89,14 +93,36 @@ void CCLIENT::init(){
     m_terrain.calculateLightning();
 }
 
+
 // Start the client game loop.
 void CCLIENT::loop(){
+
+    // FPS counter
+    double prevTime = 0.0;
+    int crntTime = 0.0;
+    double timeDiff;
+    unsigned int counter = 0;
+
+    glfwSwapInterval(0);
     // Main game loop
 	while (!glfwWindowShouldClose(m_window))
 	{
+        
+        crntTime = glfwGetTime();
+        timeDiff = crntTime - prevTime;
+        counter++;
+        if (timeDiff >= 1.0/30.0){
+            std::string FPS = std::to_string((1.0 / timeDiff) * counter);
+            std::string ms = std::to_string((timeDiff/counter) * 1000);
+            std::string title = "Client Window | FPS: " + FPS + " | ms: " + ms;
+            glfwSetWindowTitle(m_window, title.c_str());
+            prevTime = crntTime;
+            counter = 0;
+            // std::cout << "FPS: " << FPS << " | ms: " << ms << std::endl;
+        }
+
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 
         // Set up the client camera and read inputs
         // camera->inputs(window);
@@ -217,14 +243,33 @@ void CCLIENT::mouse_button_callback(GLFWwindow* window, int button, int action, 
 
 }
 
-// Clean up the allocated files.
-void CCLIENT::cleanup(){
-    // ORDER OF DELETION IS IMPORTANT:
+void CCLIENT::cleanup() {
+    // Delete player object and check dependencies
+    if (m_player) {
+        delete m_player;
+        m_player = nullptr;
+    }
 
-    // Delete player object
-    delete m_player;
-    // Delete window before ending the program
-	glfwDestroyWindow(m_window);
-	// Terminate GLFW before ending the program
-	glfwTerminate();
+    // Delete player camera
+    if (m_camera) {
+        delete m_camera;
+        m_camera = nullptr;
+    }
+
+    // Delete other players
+    for (auto& x : m_umOtherPlayers) {
+        if (x.second) {
+            delete x.second;
+            x.second = nullptr;
+        }
+    }
+
+    // Ensure GLFW window is destroyed safely
+    if (m_window) {
+        glfwDestroyWindow(m_window);
+        m_window = nullptr;
+    }
+
+    // Terminate GLFW
+    glfwTerminate();
 }

@@ -17,18 +17,14 @@ CPLAYER::CPLAYER(CSHADER* shader, glm::mat4 m4Model){
 
 CPLAYER::~CPLAYER() {
     // Delete the player's VAO, VBO, and EBO
-    m_playerVAO->Delete();
-    m_playerVBO->Delete();
-    m_playerEBO->Delete();
-    delete m_playerVAO;
-    delete m_playerVBO;
-    delete m_playerEBO;
+    if (m_playerVAO) {delete m_playerVAO; m_playerVAO = nullptr;}
+    if (m_playerVBO) {delete m_playerVBO; m_playerVBO = nullptr;}
+    if (m_playerEBO) {delete m_playerEBO; m_playerEBO = nullptr;}
 
     // Delete the player's shader
-    m_playerShader->Delete();
-    delete m_playerShader;
-
-    m_playerTexture->Delete();
+    if (m_playerShader){delete m_playerShader; m_playerShader = nullptr;}
+    
+    if (m_playerTexture){delete m_playerTexture; m_playerTexture = nullptr;}
 }
 
 void CPLAYER::init() {
