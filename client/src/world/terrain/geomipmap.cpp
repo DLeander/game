@@ -46,6 +46,7 @@ void CGEOMIPMAP::render(CCAMERA* camera) {
         // Unbind EBO
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind EBO
     }
+    m_terrainShader->DeActivate();
 }
 
 void CGEOMIPMAP::update(CCAMERA* camera){
@@ -91,7 +92,7 @@ void CGEOMIPMAP::setupBuffers() {
             for (int i = 0; i < m_iPatchSize; i++) {
                 for (int j = 0; j < m_iPatchSize; j++) {
                     // Compute the vertices
-                    float fX = x * (m_iPatchSize - 1) + j; // Ensure overlap (If we have 16, we need 15 as 15 + max(j) will be 16, otherwise we are out of bounds and cracks will occur.)
+                    float fX = x * (m_iPatchSize - 1) + j;
                     float fZ = z * (m_iPatchSize - 1) + i;
                     float fY = getTrueHeightAtPoint(fX, fZ);
                     
@@ -272,10 +273,6 @@ CGEOMIPMAP::~CGEOMIPMAP(){
             delete m_pPatches[i].m_VBOP;
             m_pPatches[i].m_VBOP = nullptr;
         }
-        if (m_pPatches[i].m_VBOPD) {
-            delete m_pPatches[i].m_VBOPD;
-            m_pPatches[i].m_VBOPD = nullptr;
-        }
         if (m_pPatches[i].m_VBOPT) {
             delete m_pPatches[i].m_VBOPT;
             m_pPatches[i].m_VBOPT = nullptr;
@@ -288,5 +285,4 @@ CGEOMIPMAP::~CGEOMIPMAP(){
     if (m_EBOPLOD1){delete m_EBOPLOD1; m_EBOPLOD1 = nullptr;}
     if (m_EBOPLOD2){delete m_EBOPLOD2; m_EBOPLOD2 = nullptr;}
     if (m_EBOPLOD3){delete m_EBOPLOD3; m_EBOPLOD3 = nullptr;}
-    if (m_EBOPDynamic){delete m_EBOPDynamic; m_EBOPDynamic = nullptr;}
 }

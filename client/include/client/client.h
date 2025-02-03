@@ -49,7 +49,7 @@ namespace std {
 
 class CCLIENT{
     public:
-        CCLIENT();
+        CCLIENT(bool bDoOfflineMode = false);
         ~CCLIENT();
         void run();
     private:
@@ -66,6 +66,7 @@ class CCLIENT{
         // Networking
         CCLIENTNETWORK m_network;
         std::atomic<bool> m_abSocketActive; // To indicate if the socket is active or not
+        bool m_bDoOfflineMode = false;
 
         // Player
         boost::uuids::uuid m_uuidClientID;

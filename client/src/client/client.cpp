@@ -1,7 +1,7 @@
 #include "client/client.h"
 
 // Init the client object.
-CCLIENT::CCLIENT() : m_abSocketActive(true){
+CCLIENT::CCLIENT(bool bDoOfflineMode) : m_abSocketActive(true), m_bDoOfflineMode(bDoOfflineMode){
     init();
 }
 
@@ -12,10 +12,13 @@ CCLIENT::~CCLIENT(){
 
 // Run the client by calling the game loop.
 void CCLIENT::run(){
-    // Create a thread for the package receive loop.
-    m_vThreads.push_back(std::thread(&CCLIENT::receivePlayersInfo, this));
-    // Create a thread for the package send loop.
-    m_vThreads.push_back(std::thread(&CCLIENT::sendPlayerInfo, this));
+    if (!m_bDoOfflineMode){
+        // Create a thread for the package receive loop.
+        m_vThreads.push_back(std::thread(&CCLIENT::receivePlayersInfo, this));
+        // Create a thread for the package send loop.
+        m_vThreads.push_back(std::thread(&CCLIENT::sendPlayerInfo, this));
+    }
+
     loop();
 
     for (std::thread &t : m_vThreads){
@@ -24,9 +27,11 @@ void CCLIENT::run(){
 }
 
 void CCLIENT::init(){
-    m_uuidClientID = m_network.connect();
-    if (m_uuidClientID == boost::uuids::nil_uuid()){
-        throw "Failed to connect to server after 25 tries.";
+    if (!m_bDoOfflineMode){
+        m_uuidClientID = m_network.connect();
+        if (m_uuidClientID == boost::uuids::nil_uuid()){
+            throw "Failed to connect to server after 25 tries.";
+        }
     }
 
     // Initialize GLFW
@@ -37,6 +42,8 @@ void CCLIENT::init(){
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	// Tell GLFW we are using the CORE profile
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    // Allow forward compatibility
+    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
     // Create the window
     m_iWindowWidth = 800;
     m_iWindowHeight = 600;
@@ -62,6 +69,11 @@ void CCLIENT::init(){
         glfwTerminate();
         throw "Failed to initialize OpenGL context";
     }
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    const GLubyte* version = glGetString(GL_VERSION);
+    std::cout << "Renderer: " << renderer << std::endl;
+    std::cout << "OpenGL version: " << version << std::endl;
+
 	// Specify the viewport of OpenGL in the Window
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
 	glViewport(0, 0, m_iWindowWidth, m_iWindowHeight);

@@ -50,6 +50,10 @@ void CSHADER::Activate(){
     glUseProgram(m_ID);
 }
 
+void CSHADER::DeActivate(){
+    glUseProgram(0);
+}
+
 void CSHADER::Delete(){
     glDeleteProgram(m_ID);
 }

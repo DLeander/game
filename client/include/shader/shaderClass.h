@@ -30,6 +30,7 @@ class CSHADER
         // ~CSHADER(){Delete();};
         ~CSHADER(){};
         void Activate();
+        void DeActivate();
         void Delete();
     private:
         void compileErrors(unsigned int shader, const char* type);

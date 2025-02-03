@@ -93,28 +93,29 @@ void CPLAYER::init() {
 
     m_iIndicesSize = sizeof(indices)/sizeof(int);
 
-    // Init VAO
+    // Init and bind VAO
     m_playerVAO = new CVAO();
-    // Bind VAO
 	m_playerVAO->Bind();
 
 	// Generates Vertex Buffer Object and links it to vertices
 	m_playerVBO = new CVBO(vertices, sizeof(vertices));
+    m_playerVBO->Bind();
 	// Generates Element Buffer Object and links it to indices
 	m_playerEBO = new CEBO(indices, sizeof(indices));
+    m_playerEBO->Bind();
 
     // Links VBO attributes such as coordinates and colors to VAO
 	m_playerVAO->LinkAttrib(*m_playerVBO, 0, 3, GL_FLOAT, 8 * sizeof(float), (void*)0);
 	m_playerVAO->LinkAttrib(*m_playerVBO, 1, 3, GL_FLOAT, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     m_playerVAO->LinkAttrib(*m_playerVBO, 2, 2, GL_FLOAT, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    
     // Unbind all to prevent accidentally modifying them
     m_playerVAO->Unbind();
     m_playerVBO->Unbind();
-    m_playerEBO->Unbind();
 
     // Load the player's texture
     m_playerTexture = new Texture("resources/textures/player/mulah.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    m_playerShader->Activate();
+    // m_playerShader->Activate();
     m_playerTexture->textureUnit(m_playerShader, "texture1", 0);
 }
 
@@ -151,7 +152,10 @@ void CPLAYER::draw(CCAMERA* camera) {
     m_playerTexture->Bind();
     m_playerVAO->Bind();
     glDrawElements(GL_TRIANGLES, m_iIndicesSize, GL_UNSIGNED_INT, 0);
+
     m_playerVAO->Unbind();
+    m_playerTexture->Unbind();
+    m_playerShader->DeActivate();
 }
 
 void CPLAYER::drawRemote(){
@@ -160,7 +164,10 @@ void CPLAYER::drawRemote(){
     m_playerTexture->Bind();
     m_playerVAO->Bind();
     glDrawElements(GL_TRIANGLES, m_iIndicesSize, GL_UNSIGNED_INT, 0);
+
     m_playerVAO->Unbind();
+    m_playerTexture->Unbind();
+    m_playerShader->DeActivate();
 }
 
 void CPLAYER::keyboard_input(GLFWwindow* window) {
