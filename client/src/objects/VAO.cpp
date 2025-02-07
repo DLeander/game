@@ -18,10 +18,10 @@ void CVAO::Bind(){
 void CVAO::Unbind(){
     glBindVertexArray(0);
 }
+
 void CVAO::Delete(){
-    if (m_ID != 0) {          // Ensure the buffer has not already been deleted
+    if (m_ID != 0 ) {          // Ensure the buffer has not already been deleted
         glDeleteVertexArrays(1, &m_ID);
         m_ID = 0;             // Reset the ID to indicate the resource is freed
     }
-    
 }

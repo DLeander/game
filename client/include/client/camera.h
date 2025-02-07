@@ -28,6 +28,7 @@ class CCAMERA {
 
         // Methods
         CCAMERA(int iWidth, int iHeight, glm::vec3 v3Position);
+        CCAMERA();
         ~CCAMERA(){};
         void matrix(float fFOVdeg, float fNearPlane, float fFarPlane, CSHADER* shader, const char* uniform);
         void updateCameraOrientation(float fYaw, float fPitch);

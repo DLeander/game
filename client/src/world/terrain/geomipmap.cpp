@@ -2,14 +2,14 @@
 
 void CGEOMIPMAP::render(CCAMERA* camera) {
     // Activate shader program
-    m_terrainShader->Activate();  // Ensure shader is correctly set up
+    m_terrainShader->Activate();
     camera->matrix(45.0f, 0.1f, 750.0f, m_terrainShader, "camMatrix");
     GLint location = glGetUniformLocation(m_terrainShader->m_ID, "camMatrix");
     if (location == -1) {
         std::cerr << "Uniform 'camMatrix' not found in shader." << std::endl;
     }
+    
     update(camera);
-
     m_terrainTexture->Bind();
     for (int patch = 0; patch < m_iNumPatchesPerSide * m_iNumPatchesPerSide; patch++){
         SGEOMM_PATCH* pCurr = &m_pPatches[patch];
@@ -47,6 +47,7 @@ void CGEOMIPMAP::render(CCAMERA* camera) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind EBO
     }
     m_terrainShader->DeActivate();
+    m_terrainTexture->Unbind();
 }
 
 void CGEOMIPMAP::update(CCAMERA* camera){
@@ -264,25 +265,30 @@ void CGEOMIPMAP::createTextureFromHeightMap() {
 }
 
 CGEOMIPMAP::~CGEOMIPMAP(){
-    for (int i = 0; i < m_iNumPatchesPerSide * m_iNumPatchesPerSide; i++){
-        if (m_pPatches[i].m_VAOP) {
-            delete m_pPatches[i].m_VAOP;
-            m_pPatches[i].m_VAOP = nullptr;
+    if (m_pPatches){
+        for (int i = 0; i < m_iNumPatchesPerSide * m_iNumPatchesPerSide; i++){
+            if (m_pPatches[i].m_VAOP) {
+                m_pPatches[i].m_VAOP->Delete();
+                delete m_pPatches[i].m_VAOP;
+                m_pPatches[i].m_VAOP = nullptr;
+            }
+            if (m_pPatches[i].m_VBOP) {
+                m_pPatches[i].m_VBOP->Delete();
+                delete m_pPatches[i].m_VBOP;
+                m_pPatches[i].m_VBOP = nullptr;
+            }
+            if (m_pPatches[i].m_VBOPT) {
+                m_pPatches[i].m_VBOPT->Delete();
+                delete m_pPatches[i].m_VBOPT;
+                m_pPatches[i].m_VBOPT = nullptr;
+            }
         }
-        if (m_pPatches[i].m_VBOP) {
-            delete m_pPatches[i].m_VBOP;
-            m_pPatches[i].m_VBOP = nullptr;
-        }
-        if (m_pPatches[i].m_VBOPT) {
-            delete m_pPatches[i].m_VBOPT;
-            m_pPatches[i].m_VBOPT = nullptr;
-        }
+        delete[] m_pPatches;
+        m_pPatches = nullptr;
     }
-    delete[] m_pPatches;
-    m_pPatches = nullptr;
-
-    if (m_EBOPLOD0){delete m_EBOPLOD0; m_EBOPLOD0 = nullptr;}
-    if (m_EBOPLOD1){delete m_EBOPLOD1; m_EBOPLOD1 = nullptr;}
-    if (m_EBOPLOD2){delete m_EBOPLOD2; m_EBOPLOD2 = nullptr;}
-    if (m_EBOPLOD3){delete m_EBOPLOD3; m_EBOPLOD3 = nullptr;}
+    
+    if (m_EBOPLOD0){m_EBOPLOD0->Delete(); delete m_EBOPLOD0; m_EBOPLOD0 = nullptr;}
+    if (m_EBOPLOD1){m_EBOPLOD1->Delete(); delete m_EBOPLOD1; m_EBOPLOD1 = nullptr;}
+    if (m_EBOPLOD2){m_EBOPLOD2->Delete(); delete m_EBOPLOD2; m_EBOPLOD2 = nullptr;}
+    if (m_EBOPLOD3){m_EBOPLOD3->Delete(); delete m_EBOPLOD3; m_EBOPLOD3 = nullptr;}
 }

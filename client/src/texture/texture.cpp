@@ -1,8 +1,6 @@
 #include "texture.h"
 
 Texture::Texture(const char* texturePath, GLenum type, GLenum slot, GLenum format, GLenum pixelType){
-    // Load the player's texture
-
     // Texture Variables
     m_Type = type;
     stbi_set_flip_vertically_on_load(true);
@@ -29,8 +27,6 @@ Texture::Texture(const char* texturePath, GLenum type, GLenum slot, GLenum forma
 }
 
 Texture::Texture(unsigned char* texture, GLenum type, GLenum slot, GLenum format, GLenum pixelType, int iWidth, int iHeight){
-    // Load the player's texture
-
     // Texture Variables
     m_Type = type;
     m_iTextureWidth=iWidth;
@@ -73,5 +69,7 @@ void Texture::Unbind(){
 }
 
 void Texture::Delete(){
-    glDeleteTextures(1, &m_ID);
+    if (m_ID != 0){
+        glDeleteTextures(1, &m_ID);
+    }
 }

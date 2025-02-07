@@ -40,6 +40,8 @@ class CTERRAIN {
         struct SHEIGHT_DATA {
             unsigned char* s_pucData;  //the height data
             int s_iSize;              //the height size (power of 2)
+
+            SHEIGHT_DATA() : s_pucData(nullptr), s_iSize(1) {}
         };
 
         SHEIGHT_DATA m_heightData; // Height data (Gathered from Heightmap)
@@ -73,7 +75,7 @@ class CTERRAIN {
         int m_iSize; // Size of the terrain (Power of 2)
 
     // Constructor
-    CTERRAIN(){}
+    CTERRAIN() : m_terrainShader(nullptr), m_terrainVAO(nullptr), m_terrainVBO(nullptr), m_terrainColorVBO(nullptr), m_terrainTexCoordsVBO(nullptr), m_ucTextureData(nullptr), m_terrainTexture(nullptr){}
     // Destructor
     ~CTERRAIN();
 

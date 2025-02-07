@@ -7,7 +7,24 @@ CCLIENT::CCLIENT(bool bDoOfflineMode) : m_abSocketActive(true), m_bDoOfflineMode
 
 // Call cleanup to delete the object.
 CCLIENT::~CCLIENT(){
-    cleanup();
+    if (m_player) {
+        delete m_player;
+        m_player = nullptr;
+    }
+
+    // Delete player camera
+    if (m_camera) {
+        delete m_camera;
+        m_camera = nullptr;
+    }
+
+    // Delete other players
+    for (auto& x : m_umOtherPlayers) {
+        if (x.second) {
+            delete x.second;
+            x.second = nullptr;
+        }
+    }
 }
 
 // Run the client by calling the game loop.
@@ -30,30 +47,18 @@ void CCLIENT::init(){
     if (!m_bDoOfflineMode){
         m_uuidClientID = m_network.connect();
         if (m_uuidClientID == boost::uuids::nil_uuid()){
-            throw "Failed to connect to server after 25 tries.";
+            throw std::runtime_error("Failed to create GLFW window");
         }
     }
-
-    // Initialize GLFW
-	glfwInit();
-    // Tell GLFW what version of OpenGL we are using 
-	// In this case we are using OpenGL 3.3
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	// Tell GLFW we are using the CORE profile
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    // Allow forward compatibility
-    glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GLFW_FALSE);
+    
     // Create the window
     m_iWindowWidth = 800;
     m_iWindowHeight = 600;
     m_window = glfwCreateWindow(m_iWindowWidth, m_iWindowHeight, "Client Window", NULL, NULL);
     glfwMakeContextCurrent(m_window);
 	// Error check if the window fails to create
-	if (m_window == NULL)
-	{
-		glfwTerminate();
-		throw "Failed to create GLFW window";
+	if (m_window == NULL){
+        throw std::runtime_error("Failed to create GLFW window");
 	}
 
     // Set the required callback functions
@@ -65,9 +70,10 @@ void CCLIENT::init(){
 	int iVersion = gladLoadGL(glfwGetProcAddress);
     if (iVersion == 0)
     {
-        glfwDestroyWindow(m_window);
-        glfwTerminate();
+        // glfwDestroyWindow(m_window);
+        // glfwTerminate();
         throw "Failed to initialize OpenGL context";
+        return;
     }
     const GLubyte* renderer = glGetString(GL_RENDERER);
     const GLubyte* version = glGetString(GL_VERSION);
@@ -96,13 +102,6 @@ void CCLIENT::init(){
     // m_terrain.midPointDisplacement(128, "resources/terrain/heightmap.png");
 
     m_terrain.init("resources/terrain/heightmap_512.raw", 512, 0.5f);
-    m_terrain.setupBuffers();
-
-    // The different x and z directions we can have in slope lightning is
-    // 1, 1 (45 degrees), 1, 0 (90 degrees), 1, -1 (135 degrees), 0, -1 (180 degrees), -1, -1 (225 degrees), -1, 0 (270 degrees), -1, 1 (315 degrees), 0, 1 (360 degrees)
-    // The sun will always move in 45 degree increments, so the day/night cycle should only recalculate the lightning every "45 degrees" of suntime.
-    m_terrain.setSlopeLightingParams(1, 1, 0.1f, 1.0f, 15.0f);
-    m_terrain.calculateLightning();
 }
 
 
@@ -119,7 +118,9 @@ void CCLIENT::loop(){
     // Main game loop
 	while (!glfwWindowShouldClose(m_window))
 	{
-        
+        if (glfwGetCurrentContext() == nullptr) {
+            std::cerr << "OpenGL context lost during main loop!" << std::endl;
+        }
         crntTime = glfwGetTime();
         timeDiff = crntTime - prevTime;
         counter++;
@@ -176,6 +177,7 @@ void CCLIENT::sendPlayerInfo(){
     while (m_abSocketActive.load()){
         SPACKAGE package(PLAYER_INFO, m_uuidClientID, m_player->m_m4Model);
         m_network.sendToServer(package);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Prevents CPU overuse
     }
 }
 
@@ -208,6 +210,7 @@ void CCLIENT::receivePlayersInfo(){
             m_umOtherPlayers[package.s_uuidClientID]->setPositionFromModelMatrix();
         }
         m_mtx.unlock();
+        std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Prevents CPU overuse
     }
 }
 
@@ -253,35 +256,4 @@ void CCLIENT::key_callback(GLFWwindow* window, int key, int scancode, int action
 // Mouse button callback function for the client.
 void CCLIENT::mouse_button_callback(GLFWwindow* window, int button, int action, int mode){
 
-}
-
-void CCLIENT::cleanup() {
-    // Delete player object and check dependencies
-    if (m_player) {
-        delete m_player;
-        m_player = nullptr;
-    }
-
-    // Delete player camera
-    if (m_camera) {
-        delete m_camera;
-        m_camera = nullptr;
-    }
-
-    // Delete other players
-    for (auto& x : m_umOtherPlayers) {
-        if (x.second) {
-            delete x.second;
-            x.second = nullptr;
-        }
-    }
-
-    // Ensure GLFW window is destroyed safely
-    if (m_window) {
-        glfwDestroyWindow(m_window);
-        m_window = nullptr;
-    }
-
-    // Terminate GLFW
-    glfwTerminate();
 }

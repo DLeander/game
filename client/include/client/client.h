@@ -9,6 +9,7 @@
 #include <mutex>
 #include <unordered_map>
 #include <atomic>
+#include <memory>
 // glad
 #include<glad/gl.h>
 // GLFW
@@ -52,6 +53,7 @@ class CCLIENT{
         CCLIENT(bool bDoOfflineMode = false);
         ~CCLIENT();
         void run();
+        GLFWwindow* getGLFWwindow(){return m_window;};
     private:
         // Variables
         std::vector<std::thread> m_vThreads;

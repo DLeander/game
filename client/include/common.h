@@ -31,6 +31,7 @@ struct SPACKAGE {
     SPACKAGE(EPackageType ptType, boost::uuids::uuid uuidClientID){
         s_ptType = ptType;
         s_uuidClientID = uuidClientID;
+        s_m4Model = glm::mat4(1.0f);
     }
     SPACKAGE(boost::uuids::uuid uuidClientID){
         s_ptType = PLAYER_CONNECT;

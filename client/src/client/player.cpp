@@ -202,6 +202,7 @@ void CPLAYER::updateOrientation() {
     // Update the player model's orientation
     glm::vec3 v3Front;
     v3Front.x = cos(glm::radians(m_fYaw));
+    v3Front.y = 0;
     v3Front.z = sin(glm::radians(m_fYaw));
     m_v3Orientation = glm::normalize(v3Front);
 }

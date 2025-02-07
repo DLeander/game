@@ -14,7 +14,7 @@ public:
     CBRUTEFORCE(){}
 
     // Destructor
-    ~CBRUTEFORCE(){}
+    ~CBRUTEFORCE();
 
     // Implement the Render method from Terrain
     void render(CCAMERA* camera) override;

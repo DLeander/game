@@ -1,5 +1,12 @@
 #include "bruteforce.h"
 
+CBRUTEFORCE::~CBRUTEFORCE(){
+        if (m_terrainTexCoordsVBO){m_terrainTexCoordsVBO->Delete(); delete m_terrainTexCoordsVBO; m_terrainTexCoordsVBO = nullptr;}
+        if (m_terrainVAO){m_terrainVAO->Delete(); delete m_terrainVAO; m_terrainVAO = nullptr;}
+        if (m_terrainVBO){m_terrainVBO->Delete(); delete m_terrainVBO; m_terrainVBO = nullptr;}
+        if (m_terrainColorVBO){m_terrainColorVBO->Delete(); delete m_terrainColorVBO; m_terrainColorVBO = nullptr;}
+    }
+
 void CBRUTEFORCE::render(CCAMERA* camera) {
     // Activate shader program
     m_terrainShader->Activate();  // Ensure shader is correctly set up

@@ -6,6 +6,12 @@ CCAMERA::CCAMERA(int iWidth, int iHeight, glm::vec3 v3Position) {
     m_v3Position = v3Position;
 }
 
+CCAMERA::CCAMERA(){
+    m_iWidth = 800;
+    m_iHeight = 600;
+    m_v3Position = glm::vec3(0.0f);
+}
+
 void CCAMERA::matrix(float fFOVdeg, float fNearPlane, float fFarPlane, CSHADER* shader, const char* uniform) {
     m_m4View = glm::mat4(1.0f);
     m_m4Projection = glm::mat4(1.0f);

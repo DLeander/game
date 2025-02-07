@@ -55,7 +55,9 @@ void CSHADER::DeActivate(){
 }
 
 void CSHADER::Delete(){
-    glDeleteProgram(m_ID);
+    if (m_ID != 0){
+        glDeleteProgram(m_ID);
+    }
 }
 
 void CSHADER::compileErrors(unsigned int uiShader, const char* type){

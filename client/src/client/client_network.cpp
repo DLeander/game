@@ -1,12 +1,12 @@
 #include "client_network.h"
 
-CCLIENTNETWORK::CCLIENTNETWORK(){
-
-}
+CCLIENTNETWORK::CCLIENTNETWORK() : m_iClientSocket(-1){}
 
 CCLIENTNETWORK::~CCLIENTNETWORK(){
-    disconnect();
-}
+    if (m_iClientSocket >= 0){
+        disconnect();
+    }
+}    
 
 // Set the socket to non-blocking if socket is about to be disconnect or a connection retry is needed.
 void setReceiveTimeout(int iSocket, int iTimeout_ms) {
