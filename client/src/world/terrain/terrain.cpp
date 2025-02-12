@@ -70,7 +70,7 @@ void CTERRAIN::setupTexture() {
         delete m_terrainTexture;
         m_terrainTexture = nullptr;
     }
-    m_terrainTexture = new Texture(m_ucTextureData, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE, m_iSize, m_iSize);
+    m_terrainTexture = new Texture(m_ucTextureData, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE, m_iSize-1, m_iSize-1);
     m_terrainTexture->textureUnit(m_terrainShader, "texture1", 0);
 }
 

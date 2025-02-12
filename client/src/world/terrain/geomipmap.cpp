@@ -8,7 +8,7 @@ void CGEOMIPMAP::render(CCAMERA* camera) {
     if (location == -1) {
         std::cerr << "Uniform 'camMatrix' not found in shader." << std::endl;
     }
-    
+
     update(camera);
     m_terrainTexture->Bind();
     for (int patch = 0; patch < m_iNumPatchesPerSide * m_iNumPatchesPerSide; patch++){
@@ -58,7 +58,7 @@ void CGEOMIPMAP::update(CCAMERA* camera){
             float fDistance = glm::distance(camera->m_v3Position, v3CurrPatch);
             // Compute LOD
             int iLOD = 0;
-            if(fDistance > 700){
+            if (fDistance > 700){
                 iLOD = 1;
             }
             else if(fDistance > 500){
@@ -79,16 +79,27 @@ void CGEOMIPMAP::update(CCAMERA* camera){
 
 void CGEOMIPMAP::setupBuffers() {
     // Setup EBOs for each LOD (CALL ONCE)
+    // This local vector stores skirt vertices which are then added to the end of vVertices so that it will be easier to NOT generate them for certain LODS.
+    std::vector<float> vSkirtVerticesTop;
+    std::vector<float> vSkirtVerticesLeft;
+    std::vector<float> vSkirtVerticesRight;
+    std::vector<float> vSkirtVerticesBottom;
+    int iSkirtHeight = 2.0f;
     // For each patch, go through its vertices and create an index buffer
-    m_vTexCoords.clear();
     for (int z = 0; z < m_iNumPatchesPerSide; z++) {
         for (int x = 0; x < m_iNumPatchesPerSide; x++) {
+            vSkirtVerticesTop.clear();
+            vSkirtVerticesLeft.clear();
+            vSkirtVerticesRight.clear();
+            vSkirtVerticesBottom.clear();
+
             // Get the current patch and compute its vertices.
             SGEOMM_PATCH* pCurr = &m_pPatches[z * m_iNumPatchesPerSide + x];
-            pCurr->m_vVertices.resize(m_iPatchSize * m_iPatchSize * 3); // Pre-allocate memory
-            // pCurr->m_vTexCoords.resize(m_iPatchSize * m_iPatchSize * 2); // Pre-allocate memory
+            pCurr->m_vVertices.clear();
+            pCurr->m_vTexCoords.clear();
+            pCurr->m_vVertices.resize(m_iPatchSize * m_iPatchSize * 3); // Pre-allocate memory for terrain vertices
+            pCurr->m_vTexCoords.resize(m_iPatchSize * m_iPatchSize * 2); // Pre-allocate memory texture coordinates
 
-            
             // Compute the vertices
             for (int i = 0; i < m_iPatchSize; i++) {
                 for (int j = 0; j < m_iPatchSize; j++) {
@@ -98,15 +109,43 @@ void CGEOMIPMAP::setupBuffers() {
                     float fY = getTrueHeightAtPoint(fX, fZ);
                     
                     // Index to place the vertex in the vector
-                    int index = (i * m_iPatchSize + j) * 3; // 3 components per vertex
-                    pCurr->m_vVertices[index]     = fX; // X coordinate
-                    pCurr->m_vVertices[index + 1] = fY; // Y coordinate
-                    pCurr->m_vVertices[index + 2] = fZ; // Z coordinate
+                    int iVIndex = (i * m_iPatchSize + j) * 3; // 3 components per vertex
+                    pCurr->m_vVertices[iVIndex] = fX; // X coordinate
+                    pCurr->m_vVertices[iVIndex+1] = fY; // Y coordinate
+                    pCurr->m_vVertices[iVIndex+2] = fZ; // Z coordinate
 
-                    pCurr->m_vTexCoords.push_back(static_cast<float>(fX) / (m_iSize)); // textureLeft
-                    pCurr->m_vTexCoords.push_back(static_cast<float>(fZ) / (m_iSize)); // textureBottom
+                    int iCIndex = (i * m_iPatchSize + j) * 2;
+                    pCurr->m_vTexCoords[iCIndex] = (static_cast<float>(fX) / (m_iSize));
+                    pCurr->m_vTexCoords[iCIndex+1] = (static_cast<float>(fZ) / (m_iSize));
+
+                    if (i == 0){
+                        vSkirtVerticesTop.push_back(fX);
+                        vSkirtVerticesTop.push_back(fY - iSkirtHeight); // Lowered height
+                        vSkirtVerticesTop.push_back(fZ);
+                    }
+                    if (j == 0){
+                        vSkirtVerticesLeft.push_back(fX);
+                        vSkirtVerticesLeft.push_back(fY - iSkirtHeight); // Lowered height
+                        vSkirtVerticesLeft.push_back(fZ);
+                    }
+                    if (j == m_iPatchSize - 1){
+                        vSkirtVerticesRight.push_back(fX);
+                        vSkirtVerticesRight.push_back(fY - iSkirtHeight); // Lowered height
+                        vSkirtVerticesRight.push_back(fZ);
+                    }
+                    if (i == m_iPatchSize - 1){
+                        vSkirtVerticesBottom.push_back(fX);
+                        vSkirtVerticesBottom.push_back(fY - iSkirtHeight); // Lowered height
+                        vSkirtVerticesBottom.push_back(fZ);
+                    }
                 }
             }
+            // Add the skirts to the end of the vertices vector. ORDER IS: TOP LEFT RIGHT BOTTOM (Should be 32 of each)
+            pCurr->m_vVertices.insert(pCurr->m_vVertices.end(), vSkirtVerticesTop.begin(), vSkirtVerticesTop.end());
+            pCurr->m_vVertices.insert(pCurr->m_vVertices.end(), vSkirtVerticesLeft.begin(), vSkirtVerticesLeft.end());
+            pCurr->m_vVertices.insert(pCurr->m_vVertices.end(), vSkirtVerticesRight.begin(), vSkirtVerticesRight.end());
+            pCurr->m_vVertices.insert(pCurr->m_vVertices.end(), vSkirtVerticesBottom.begin(), vSkirtVerticesBottom.end());
+
             pCurr->m_VAOP = new CVAO();
             pCurr->m_VAOP->Bind();
             pCurr->m_VBOP = new CVBO(pCurr->m_vVertices.data(), pCurr->m_vVertices.size() * sizeof(float));
@@ -149,11 +188,20 @@ void CGEOMIPMAP::setupBuffers() {
     }
 
     // LOD 1 (Half resolution)
+    // Skirts start at the end of the vertices vector.
+    int iSkirtIndexTop = m_iPatchSize * m_iPatchSize;
+    int iSkirtIndexLeft = m_iPatchSize * m_iPatchSize + m_iPatchSize;
+    int iSkirtIndexRight = m_iPatchSize * m_iPatchSize + 2*(m_iPatchSize);
+    int iSkirtIndexBottom = m_iPatchSize * m_iPatchSize + 3*(m_iPatchSize);
     for (int i = 0; i < m_iPatchSize; i += 2) {
         for (int j = 0; j < m_iPatchSize; j += 2) {
+
             int iTopLeft = i * m_iPatchSize + j;
+
             int iTopRight = i * m_iPatchSize + std::min(j + 2, m_iPatchSize - 1); // Prevent out-of-bounds
+
             int iBottomLeft = std::min(i + 2, m_iPatchSize - 1) * m_iPatchSize + j;
+
             int iBottomRight = std::min(i + 2, m_iPatchSize - 1) * m_iPatchSize + std::min(j + 2, m_iPatchSize - 1);
 
             // Avoid pushing indices out of bounds
@@ -173,6 +221,56 @@ void CGEOMIPMAP::setupBuffers() {
             m_vIndicesLOD1.push_back(iTopRight);
             m_vIndicesLOD1.push_back(iBottomLeft);
             m_vIndicesLOD1.push_back(iBottomRight);
+
+            // If we are at the edge of LOD1 patch, then we add a skirt to fix cracks between different LODs.
+            // **Skirt Indices for LOD Cracks**
+            if (i == 0 && iSkirtIndexTop < m_iPatchSize*m_iPatchSize + m_iPatchSize - 1) {  // Top Skirt
+                m_vIndicesLOD1.push_back(iTopLeft);
+                m_vIndicesLOD1.push_back(iSkirtIndexTop);
+                m_vIndicesLOD1.push_back(iTopRight);
+
+                m_vIndicesLOD1.push_back(iTopRight);
+                m_vIndicesLOD1.push_back(iSkirtIndexTop);
+                m_vIndicesLOD1.push_back(iSkirtIndexTop + 2);
+
+                iSkirtIndexTop += 2;
+            }
+
+            if (j == 0 && iSkirtIndexLeft <  m_iPatchSize*m_iPatchSize + 2*(m_iPatchSize) - 1) { // Left Skirt
+                m_vIndicesLOD1.push_back(iSkirtIndexLeft);
+                m_vIndicesLOD1.push_back(iSkirtIndexLeft + 2);
+                m_vIndicesLOD1.push_back(iTopLeft);
+
+                m_vIndicesLOD1.push_back(iTopLeft);
+                m_vIndicesLOD1.push_back(iSkirtIndexLeft + 2);
+                m_vIndicesLOD1.push_back(iBottomLeft);
+
+                iSkirtIndexLeft += 2;
+            }
+
+            if (j == m_iPatchSize - 1 && iSkirtIndexRight < m_iPatchSize*m_iPatchSize + 3*(m_iPatchSize) - 1) { // Right Skirt
+                m_vIndicesLOD1.push_back(iTopRight);
+                m_vIndicesLOD1.push_back(iSkirtIndexRight);
+                m_vIndicesLOD1.push_back(iBottomRight);
+
+                m_vIndicesLOD1.push_back(iSkirtIndexRight);
+                m_vIndicesLOD1.push_back(iBottomRight);
+                m_vIndicesLOD1.push_back(iSkirtIndexRight+2);
+
+                iSkirtIndexRight += 2;
+            }
+
+            if (i == m_iPatchSize - 1 && iSkirtIndexBottom < m_iPatchSize*m_iPatchSize + 4*(m_iPatchSize) - 1) { // Bottom Skirt
+                m_vIndicesLOD1.push_back(iBottomLeft);  // Top-left of the patch
+                m_vIndicesLOD1.push_back(iBottomRight); // Top-right of the patch
+                m_vIndicesLOD1.push_back(iSkirtIndexBottom);  // Bottom-left (skirt vertex)
+
+                m_vIndicesLOD1.push_back(iSkirtIndexBottom);   // Bottom-left (skirt vertex)
+                m_vIndicesLOD1.push_back(iBottomRight);  // Top-right of the patch
+                m_vIndicesLOD1.push_back(iSkirtIndexBottom + 2); // Bottom-right (skirt vertex)
+
+                iSkirtIndexBottom += 2;
+            }
         }
     }
 

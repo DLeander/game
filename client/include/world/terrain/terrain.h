@@ -48,11 +48,6 @@ class CTERRAIN {
         float m_fHeightScale; // Height scale of the terrain
 
         CSHADER* m_terrainShader;
-        CVAO* m_terrainVAO;
-        CVBO* m_terrainVBO;
-        CVBO* m_terrainColorVBO;
-        CVBO* m_terrainTexCoordsVBO;
-        // EBO* terrainEBO;
         unsigned char* m_ucTextureData;
         Texture* m_terrainTexture;
 
@@ -72,10 +67,10 @@ class CTERRAIN {
 
 
     public:
-        int m_iSize; // Size of the terrain (Power of 2)
+        int m_iSize; // Size of the terrain (Must be 2^n + 1)
 
     // Constructor
-    CTERRAIN() : m_terrainShader(nullptr), m_terrainVAO(nullptr), m_terrainVBO(nullptr), m_terrainColorVBO(nullptr), m_terrainTexCoordsVBO(nullptr), m_ucTextureData(nullptr), m_terrainTexture(nullptr){}
+    CTERRAIN() : m_terrainShader(nullptr), m_ucTextureData(nullptr), m_terrainTexture(nullptr){}
     // Destructor
     ~CTERRAIN();
 

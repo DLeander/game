@@ -85,9 +85,9 @@ void CCLIENT::init(){
 	glViewport(0, 0, m_iWindowWidth, m_iWindowHeight);
     // Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
+    // glFrontFace(GL_CCW);
 
     // Init player shader
     m_playerShader = new CSHADER("resources/shaders/default.vert", "resources/shaders/default.frag");
@@ -101,6 +101,7 @@ void CCLIENT::init(){
     // m_terrain.faultFormation(0, 255, 32, iHeightMapHW + 32, "resources/terrain/heightmap.png");
     // m_terrain.midPointDisplacement(128, "resources/terrain/heightmap.png");
 
+    // HEIGHTMAP SIZE = (2^n - 1) by (2^n - 1) but inputted heightmap should be 2^n by 2^n, with patch size (2^n - 1) to get correct sized triangles making up terrain. 
     m_terrain.init("resources/terrain/heightmap_512.raw", 512, 0.5f);
 }
 

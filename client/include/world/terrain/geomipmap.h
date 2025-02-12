@@ -26,7 +26,7 @@ public:
 
     // Constructor
     CGEOMIPMAP(int iSize, int iNumPatchesPerSide) : m_iNumPatchesPerSide(iNumPatchesPerSide) { m_iSize = iSize; m_pPatches = new SGEOMM_PATCH[iNumPatchesPerSide * iNumPatchesPerSide];}
-    CGEOMIPMAP(){ m_iSize = 512; m_iPatchSize = 32; m_iNumPatchesPerSide = m_iSize/m_iPatchSize; m_pPatches = new SGEOMM_PATCH[m_iNumPatchesPerSide * m_iNumPatchesPerSide];}
+    CGEOMIPMAP(){ m_iSize = 512; m_iPatchSize = 31; m_iNumPatchesPerSide = (m_iSize-1)/(m_iPatchSize-1); m_pPatches = new SGEOMM_PATCH[m_iNumPatchesPerSide * m_iNumPatchesPerSide];}
 
     // Destructor
     ~CGEOMIPMAP();

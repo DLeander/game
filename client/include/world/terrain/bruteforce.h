@@ -20,4 +20,12 @@ public:
     void render(CCAMERA* camera) override;
     void setupBuffers() override;
     void createTextureFromHeightMap() override;
+
+private:
+    // Variables
+    CVAO* m_terrainVAO;
+    CVBO* m_terrainVBO;
+    CVBO* m_terrainColorVBO;
+    CVBO* m_terrainTexCoordsVBO;
+    CEBO* terrainEBO;
 };
