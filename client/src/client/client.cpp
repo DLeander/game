@@ -85,9 +85,9 @@ void CCLIENT::init(){
 	glViewport(0, 0, m_iWindowWidth, m_iWindowHeight);
     // Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
-    // glEnable(GL_CULL_FACE);
-    // glCullFace(GL_BACK);
-    // glFrontFace(GL_CCW);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     // Init player shader
     m_playerShader = new CSHADER("resources/shaders/default.vert", "resources/shaders/default.frag");
@@ -102,7 +102,8 @@ void CCLIENT::init(){
     // m_terrain.midPointDisplacement(128, "resources/terrain/heightmap.png");
 
     // HEIGHTMAP SIZE = (2^n - 1) by (2^n - 1) but inputted heightmap should be 2^n by 2^n, with patch size (2^n - 1) to get correct sized triangles making up terrain. 
-    m_terrain.init("resources/terrain/heightmap_512.raw", 512, 0.5f);
+    m_terrain.init("resources/terrain/heightmap_512.raw", 512, 0.1f);
+    m_player->getTerrainCollision().setHeightData(m_terrain.getHeightData());
 }
 
 
@@ -117,6 +118,7 @@ void CCLIENT::loop(){
 
     glfwSwapInterval(0);
     // Main game loop
+    timeManager.init();
 	while (!glfwWindowShouldClose(m_window))
 	{
         if (glfwGetCurrentContext() == nullptr) {
@@ -217,13 +219,14 @@ void CCLIENT::receivePlayersInfo(){
 
 // Render the client.
 void CCLIENT::render() {
-    // Render with wireframe
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     renderWorld();
 
-    m_player->keyboard_input(m_window);
+    timeManager.update();
+    float fDeltaTime = timeManager.getDeltaTime();
+    m_player->keyboard_input(m_window, fDeltaTime);
     m_player->mouse_input(m_window, m_camera);
+    m_player->applyGravity(fDeltaTime);
+    m_player->checkCollisions();
     m_player->setupModelMatrix(m_camera);
     m_player->draw(m_camera);
 

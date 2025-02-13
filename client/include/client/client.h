@@ -36,6 +36,8 @@
 #include "terrain.h"
 #include "bruteforce.h"
 #include "geomipmap.h"
+#include "collision/terrainCollision.h"
+#include "timeManager.h"
 
 namespace std {
     template <>
@@ -76,6 +78,7 @@ class CCLIENT{
         std::unordered_map<boost::uuids::uuid, CPLAYER*> m_umOtherPlayers;
         CGEOMIPMAP m_terrain;
         CCAMERA* m_camera;
+        CTIMEMANAGER timeManager;
 
         // Methods
         void init();

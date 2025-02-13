@@ -5,10 +5,11 @@ CXX = g++
 CXXFLAGS = -Wall -g -std=c++11
 
 # Include paths
-INCLUDES = -Iinclude -Iinclude/glm -Iinclude/stb -I/usr/include/GLFW -I/usr/include/boost -Iinclude/client -Iinclude/shader -Iinclude/objects -Iinclude/texture -Iinclude/world/terrain
+INCLUDES = -Iinclude -Iinclude/glm -Iinclude/stb -I/usr/include/GLFW -I/usr/include/boost -Iinclude/client -Iinclude/shader -Iinclude/objects -Iinclude/texture -Iinclude/world/terrain -Iinclude/collision
 
 # Source files
-CPP_SRCS = main.cpp src/stb/stb.cpp src/client/client.cpp src/shader/shaderClass.cpp src/objects/EBO.cpp src/objects/VAO.cpp src/objects/VBO.cpp src/client/camera.cpp src/client/player.cpp src/client/client_network.cpp src/texture/texture.cpp src/world/terrain/terrain.cpp src/world/terrain/bruteforce.cpp src/world/terrain/geomipmap.cpp
+# CPP_SRCS := main.cpp $(wildcard src/**/*.cpp)
+CPP_SRCS = main.cpp src/stb/stb.cpp src/client/client.cpp src/shader/shaderClass.cpp src/objects/EBO.cpp src/objects/VAO.cpp src/objects/VBO.cpp src/client/camera.cpp src/client/player.cpp src/client/client_network.cpp src/texture/texture.cpp src/world/terrain/terrain.cpp src/world/terrain/bruteforce.cpp src/world/terrain/geomipmap.cpp src/collision/terrainCollision.cpp
 C_SRCS = src/glad/gl.c
 
 # Object files

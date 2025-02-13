@@ -2,14 +2,17 @@
 
 CPLAYER::CPLAYER(CSHADER* shader) {
     // Initialize the player's position
+    m_fSpeed = 0.0001f;
     m_m4Model = glm::mat4(1.0f);
-    m_v3Position = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_v3Position = glm::vec3(128.0f, 256.0f, 128.0f);
     m_playerShader = shader;
     init();
     m_bInitialised = true;
 }
 
 CPLAYER::CPLAYER(CSHADER* shader, glm::mat4 m4Model){
+    m_fSpeed = 0.0001f;
+    m_v3Position = glm::vec3(00.0f, 00.0f, 00.0f);
     m_m4Model = m4Model;
     m_playerShader = shader;
     m_bInitialised = false;
@@ -28,8 +31,6 @@ CPLAYER::~CPLAYER() {
 }
 
 void CPLAYER::init() {
-    m_fSpeed = 0.01f;
-    m_v3Position = glm::vec3(0.0f, 0.0f, 0.0f);
 
     GLfloat vertices[] = {
         // Positions            // Colors           // Texture Coords
@@ -117,6 +118,26 @@ void CPLAYER::init() {
     m_playerTexture = new Texture("resources/textures/player/mulah.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     // m_playerShader->Activate();
     m_playerTexture->textureUnit(m_playerShader, "texture1", 0);
+
+}
+
+void CPLAYER::checkCollisions(){
+    float iY = m_terrainCollision.interpolateHeight(m_v3Position.x, m_v3Position.z, m_v3Position.y);
+    if (m_v3Position.y > iY){
+        m_bIsGrounded = false;
+    }
+    else{
+        m_bIsGrounded = true;
+        m_v3Velocity.y = 0;
+        m_v3Position.y = iY;
+    }
+}
+
+void CPLAYER::applyGravity(float fDeltaTime){
+    if (!m_bIsGrounded) {
+        m_v3Velocity.y += m_fGravity * fDeltaTime;  // Apply gravity (only affects Y-axis)
+    }
+    m_v3Position += m_v3Velocity * fDeltaTime;  // Update position
 }
 
 // Setup the model matrix for the player
@@ -146,7 +167,7 @@ void CPLAYER::setPositionFromModelMatrix() {
 void CPLAYER::draw(CCAMERA* camera) {
     m_playerShader->Activate();
     // Set the view and projection matrices
-    camera->matrix(45.0f, 0.1f, 300.0f, m_playerShader, "camMatrix");
+    camera->matrix(90.0f, 0.1f, 300.0f, m_playerShader, "camMatrix");
     glUniformMatrix4fv(glGetUniformLocation(m_playerShader->m_ID, "model"), 1, GL_FALSE, glm::value_ptr(m_m4Model));
     // Common rendering code
     m_playerTexture->Bind();
@@ -170,32 +191,27 @@ void CPLAYER::drawRemote(){
     m_playerShader->DeActivate();
 }
 
-void CPLAYER::keyboard_input(GLFWwindow* window) {
-	// Handles key inputs
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-		m_v3Position += m_fSpeed * m_v3Orientation;
-	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-		m_v3Position += m_fSpeed * -glm::normalize(glm::cross(m_v3Orientation, m_v3Up));
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-		m_v3Position += m_fSpeed * -m_v3Orientation;
-	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-		m_v3Position += m_fSpeed * glm::normalize(glm::cross(m_v3Orientation, m_v3Up));
-	}
-	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
-		m_v3Position += m_fSpeed * m_v3Up;
-	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS){
-		m_v3Position += m_fSpeed * -m_v3Up;
-	}
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
-		m_fSpeed = 0.1f;
-	}
-	else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE){
-		m_fSpeed = 0.01f;
-	}
+void CPLAYER::keyboard_input(GLFWwindow* window, float fDeltaTime) {
+    // Handles key inputs and moves the player
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+        m_v3Position += m_fSpeed * m_v3Orientation * fDeltaTime;  // Move forward, scaled by deltaTime
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+        m_v3Position += m_fSpeed * -glm::normalize(glm::cross(m_v3Orientation, m_v3Up)) * fDeltaTime;  // Move left, scaled by deltaTime
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        m_v3Position += m_fSpeed * -m_v3Orientation * fDeltaTime;  // Move backward, scaled by deltaTime
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        m_v3Position += m_fSpeed * glm::normalize(glm::cross(m_v3Orientation, m_v3Up)) * fDeltaTime;  // Move right, scaled by deltaTime
+    }
+
+    // if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
+    //     m_fSpeed = 0.1f;
+    // }
+    // else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE){
+    //     m_fSpeed = 0.01f;
+    // }
 }
 
 void CPLAYER::updateOrientation() {
@@ -226,7 +242,7 @@ void CPLAYER::mouse_input(GLFWwindow* window, CCAMERA* camera) {
 
         // Clamp pitch to avoid gimbal lock (prevent looking straight up or down)
         if (m_fPitch > 0) m_fPitch = 0;
-        if (m_fPitch < -15.0f) m_fPitch = -15.0f;
+        if (m_fPitch < -30.0f) m_fPitch = -30.0f;
 
         // Update player orientation based on yaw
         updateOrientation();

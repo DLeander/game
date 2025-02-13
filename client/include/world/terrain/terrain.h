@@ -23,26 +23,16 @@
 
 #include <algorithm>
 
-// struct STERRAIN_TEXTURE_REGIONS{
-//     int m_iLowHeight;      // lowest possible height (0%)
-//     int m_iOptimalHeight; // optimal height (100%)
-//     int m_iHighHeight;   // highest possible height (0%)
-// };
-
-// struct STERRAIN_TEXTURE_TILES{
-//     STERRAIN_TEXTURE_REGIONS m_regions[TERRAIN_NUM_TILES]; //texture regions
-//     const char* textureTiles[TERRAIN_NUM_TILES];           //texture tiles
-//     int iNumTiles;
-// };
-
-class CTERRAIN {
-    protected:
-        struct SHEIGHT_DATA {
+struct SHEIGHT_DATA {
             unsigned char* s_pucData;  //the height data
             int s_iSize;              //the height size (power of 2)
 
-            SHEIGHT_DATA() : s_pucData(nullptr), s_iSize(1) {}
-        };
+            SHEIGHT_DATA() : s_pucData(nullptr), s_iSize(0) {}
+};
+
+class CTERRAIN {
+    protected:
+        
 
         SHEIGHT_DATA m_heightData; // Height data (Gathered from Heightmap)
         float m_fHeightScale; // Height scale of the terrain
@@ -67,7 +57,7 @@ class CTERRAIN {
 
 
     public:
-        int m_iSize; // Size of the terrain (Must be 2^n + 1)
+        int m_iSize; // Size of the terrain (Must be 2^n)
 
     // Constructor
     CTERRAIN() : m_terrainShader(nullptr), m_ucTextureData(nullptr), m_terrainTexture(nullptr){}
@@ -95,7 +85,6 @@ class CTERRAIN {
     void calculateLightning();
 
     void setupShader();
-    // void setupBuffers();
     void setupTexture(const char* filename);
     void setupTexture();
 
@@ -107,4 +96,5 @@ class CTERRAIN {
     inline unsigned char getTrueHeightAtPoint(int iX, int iZ) { return m_heightData.s_pucData[iX + iZ * m_iSize]; }
     // Retrieve the scaled height at a given point
     inline float getScaledHeightAtPoint(int iX, int iZ) { return m_heightData.s_pucData[iX + iZ * m_iSize] * m_fHeightScale; }
+    SHEIGHT_DATA getHeightData(){return m_heightData;}
 };
