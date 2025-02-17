@@ -32,6 +32,8 @@ class CCAMERA {
         ~CCAMERA(){};
         void matrix(float fFOVdeg, float fNearPlane, float fFarPlane, CSHADER* shader, const char* uniform);
         void updateCameraOrientation(float fYaw, float fPitch);
+        void updateCameraMatrix(int iWidth, int iHeight, float fFOVdeg, float fNearPlane, float fFarPlane, CSHADER* shader, const char* uniform);
+
         // void matrix(float FOVdeg, float nearPlane, float farPlane, Shader* shader, glm::mat4 model);
         // void inputs(GLFWwindow* window);
 

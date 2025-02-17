@@ -121,23 +121,27 @@ void CPLAYER::init() {
 
 }
 
-void CPLAYER::checkCollisions(){
-    float iY = m_terrainCollision.interpolateHeight(m_v3Position.x, m_v3Position.z, m_v3Position.y);
-    if (m_v3Position.y > iY){
+void CPLAYER::checkCollisions(CTERRAIN* terrain) {
+    float iY = m_terrainCollision.calcCollisionHeightBaryCentric(terrain, m_v3Position.x, m_v3Position.z);
+
+    // Improved ground check
+    if (m_v3Position.y > iY + 0.01f) {  
         m_bIsGrounded = false;
-    }
-    else{
+    } else {
         m_bIsGrounded = true;
-        m_v3Velocity.y = 0;
-        m_v3Position.y = iY;
+        m_v3Velocity.y = 0;   // Reset velocity when grounded
+        m_v3Position.y = iY;  // Snap to ground level
     }
 }
 
 void CPLAYER::applyGravity(float fDeltaTime){
     if (!m_bIsGrounded) {
-        m_v3Velocity.y += m_fGravity * fDeltaTime;  // Apply gravity (only affects Y-axis)
+        m_v3Velocity.y += -m_fGravity * fDeltaTime;  // Apply gravity (only affects Y-axis)
+        m_v3Position.y += m_v3Velocity.y * fDeltaTime;  // Update position
     }
-    m_v3Position += m_v3Velocity * fDeltaTime;  // Update position
+    else {
+        m_v3Velocity.y = 0;
+    }
 }
 
 // Setup the model matrix for the player
@@ -176,7 +180,9 @@ void CPLAYER::draw(CCAMERA* camera) {
 
     m_playerVAO->Unbind();
     m_playerTexture->Unbind();
-    m_playerShader->DeActivate();
+
+    // FIX ISSUE WITH DEACTIVATION HERE:
+    // m_playerShader->DeActivate();
 }
 
 void CPLAYER::drawRemote(){
@@ -194,16 +200,22 @@ void CPLAYER::drawRemote(){
 void CPLAYER::keyboard_input(GLFWwindow* window, float fDeltaTime) {
     // Handles key inputs and moves the player
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
-        m_v3Position += m_fSpeed * m_v3Orientation * fDeltaTime;  // Move forward, scaled by deltaTime
+        m_v3Position += (m_fSpeed * m_v3Orientation) * fDeltaTime;  // Move forward, scaled by deltaTime
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
-        m_v3Position += m_fSpeed * -glm::normalize(glm::cross(m_v3Orientation, m_v3Up)) * fDeltaTime;  // Move left, scaled by deltaTime
+        m_v3Position += (m_fSpeed * -glm::normalize(glm::cross(m_v3Orientation, m_v3Up))) * fDeltaTime;  // Move left, scaled by deltaTime
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
-        m_v3Position += m_fSpeed * -m_v3Orientation * fDeltaTime;  // Move backward, scaled by deltaTime
+        m_v3Position += (m_fSpeed * -m_v3Orientation) * fDeltaTime;  // Move backward, scaled by deltaTime
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
-        m_v3Position += m_fSpeed * glm::normalize(glm::cross(m_v3Orientation, m_v3Up)) * fDeltaTime;  // Move right, scaled by deltaTime
+        m_v3Position += (m_fSpeed * glm::normalize(glm::cross(m_v3Orientation, m_v3Up))) * fDeltaTime;  // Move right, scaled by deltaTime
+    }
+
+    // Jumping.
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS && m_bIsGrounded) {
+        m_v3Velocity.y = m_fJumpForce;  // Apply initial jump velocity
+        m_bIsGrounded = false;        // Character is in the air
     }
 
     // if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){

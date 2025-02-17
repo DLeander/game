@@ -40,7 +40,7 @@ class CPLAYER {
         glm::vec3 m_v3Orientation = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 m_v3Up = glm::vec3(0.0f, 1.0f, 0.0f);
         glm::vec3 m_v3Velocity = glm::vec3(0.0f, 0.0f, 0.0f);
-        float m_fSensitivity = 0.005f;
+        float m_fSensitivity = 0.01f;
         float m_fYaw = 0.0f;
         float m_fPitch = 0.0f;
 
@@ -49,7 +49,7 @@ class CPLAYER {
         CPLAYER(CSHADER* shader, glm::mat4 m4Model);
         ~CPLAYER();
         void init();
-        void checkCollisions();
+        void checkCollisions(CTERRAIN* terrain);
         void applyGravity(float deltaTime);
         void setupModelMatrix(CCAMERA* camera);
         void setPositionFromModelMatrix();
@@ -71,8 +71,8 @@ class CPLAYER {
 
         // Movement
         bool m_bIsGrounded = false;
-        float m_fGravity = -0.009f;
-        float m_fJumpForce = 10.0f;
+        float m_fGravity = 0.000009f;
+        float m_fJumpForce = 0.005f;
 
         // Methods
 };

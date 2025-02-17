@@ -27,6 +27,45 @@ CCLIENT::~CCLIENT(){
     }
 }
 
+// Mouse callback functions for the client.
+// void mouse_callback(GLFWwindow* window, double xpos, double ypos){
+
+// }
+
+// Scroll callback function for the client.
+// void scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
+
+// }
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+        glfwSetWindowShouldClose(window, GLFW_TRUE);
+    }
+
+    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    if (key == GLFW_KEY_H && action == GLFW_PRESS) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int iWidth, int iHeight) {
+    glViewport(0, 0, iWidth, iHeight); // Adjust the OpenGL viewport
+    CCLIENT* client = static_cast<CCLIENT*>(glfwGetWindowUserPointer(window));
+    if (client != nullptr){        
+        client->getCamera()->updateCameraMatrix(iWidth, iHeight, 90.0f, 0.1f, 300.0f, client->getPlayerShader(), "camMatrix");
+        client->setWindowWidth(iWidth);
+        client->setWindowHeight(iHeight);
+    }
+}
+
+// Mouse button callback function for the client.
+// static void mouse_button_callback(GLFWwindow* window, int button, int action, int mode){
+
+// }
+
 // Run the client by calling the game loop.
 void CCLIENT::run(){
     if (!m_bDoOfflineMode){
@@ -54,6 +93,7 @@ void CCLIENT::init(){
     // Create the window
     m_iWindowWidth = 800;
     m_iWindowHeight = 600;
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     m_window = glfwCreateWindow(m_iWindowWidth, m_iWindowHeight, "Client Window", NULL, NULL);
     glfwMakeContextCurrent(m_window);
 	// Error check if the window fails to create
@@ -63,6 +103,7 @@ void CCLIENT::init(){
 
     // Set the required callback functions
     glfwSetKeyCallback(m_window, key_callback);
+    glfwSetFramebufferSizeCallback(m_window, framebuffer_size_callback);
     // glfwSetCursorPosCallback(window, mouse_callback);
     // glfwSetScrollCallback(window, scroll_callback);
     // glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -90,20 +131,15 @@ void CCLIENT::init(){
     glFrontFace(GL_CCW);
 
     // Init player shader
-    m_playerShader = new CSHADER("resources/shaders/default.vert", "resources/shaders/default.frag");
-    
-    m_player = new CPLAYER(m_playerShader);
-
     m_camera = new CCAMERA(m_iWindowWidth, m_iWindowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
-
-    // Init terrain
-    // int iHeightMapHW = 128;
-    // m_terrain.faultFormation(0, 255, 32, iHeightMapHW + 32, "resources/terrain/heightmap.png");
-    // m_terrain.midPointDisplacement(128, "resources/terrain/heightmap.png");
+        m_playerShader = new CSHADER("resources/shaders/default.vert", "resources/shaders/default.frag");
+    m_player = new CPLAYER(m_playerShader);
 
     // HEIGHTMAP SIZE = (2^n - 1) by (2^n - 1) but inputted heightmap should be 2^n by 2^n, with patch size (2^n - 1) to get correct sized triangles making up terrain. 
     m_terrain.init("resources/terrain/heightmap_512.raw", 512, 0.1f);
-    m_player->getTerrainCollision().setHeightData(m_terrain.getHeightData());
+    // m_player->getTerrainCollision().setHeightData(m_terrain.getHeightData());
+
+    glfwSetWindowUserPointer(m_window, this);
 }
 
 
@@ -226,38 +262,9 @@ void CCLIENT::render() {
     m_player->keyboard_input(m_window, fDeltaTime);
     m_player->mouse_input(m_window, m_camera);
     m_player->applyGravity(fDeltaTime);
-    m_player->checkCollisions();
+    m_player->checkCollisions(&m_terrain);
     m_player->setupModelMatrix(m_camera);
     m_player->draw(m_camera);
 
     renderPlayers();
-}
-
-// Mouse callback functions for the client.
-void CCLIENT::mouse_callback(GLFWwindow* window, double xpos, double ypos){
-
-}
-
-// Scroll callback function for the client.
-void CCLIENT::scroll_callback(GLFWwindow* window, double xoffset, double yoffset){
-
-}
-
-void CCLIENT::key_callback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
-    }
-
-    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    }
-    if (key == GLFW_KEY_H && action == GLFW_PRESS) {
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    }
-
-}
-
-// Mouse button callback function for the client.
-void CCLIENT::mouse_button_callback(GLFWwindow* window, int button, int action, int mode){
-
 }

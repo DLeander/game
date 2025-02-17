@@ -27,5 +27,4 @@ private:
     CVBO* m_terrainVBO;
     CVBO* m_terrainColorVBO;
     CVBO* m_terrainTexCoordsVBO;
-    CEBO* terrainEBO;
 };

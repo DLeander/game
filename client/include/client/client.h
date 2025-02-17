@@ -55,7 +55,16 @@ class CCLIENT{
         CCLIENT(bool bDoOfflineMode = false);
         ~CCLIENT();
         void run();
+
+        // Getters
         GLFWwindow* getGLFWwindow(){return m_window;};
+        CSHADER* getPlayerShader(){return m_playerShader;};
+        CCAMERA* getCamera(){return m_camera;};
+
+        // Setters
+        void setWindowWidth(int iWidth){m_iWindowWidth = iWidth;};
+        void setWindowHeight(int iHeight){m_iWindowHeight = iHeight;};
+
     private:
         // Variables
         std::vector<std::thread> m_vThreads;
@@ -88,9 +97,10 @@ class CCLIENT{
         void receivePlayersInfo();
         void sendPlayerInfo();
         void renderWorld();
-        static void mouse_callback(GLFWwindow* window, double dXpos, double dYpos);
-        static void scroll_callback(GLFWwindow* window, double dXoffset, double dYoffset);
-        static void key_callback(GLFWwindow* window, int iKey, int iScancode, int iAction, int iMods);
-        static void mouse_button_callback(GLFWwindow* window, int iButton, int iAction, int mods);
+        // static void mouse_callback(GLFWwindow* window, double dXpos, double dYpos);
+        // static void scroll_callback(GLFWwindow* window, double dXoffset, double dYoffset);
+        // static void key_callback(GLFWwindow* window, int iKey, int iScancode, int iAction, int iMods);
+        // static void mouse_button_callback(GLFWwindow* window, int iButton, int iAction, int mods);
+        // static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
         void cleanup();
 };

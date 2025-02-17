@@ -19,8 +19,29 @@ void CCAMERA::matrix(float fFOVdeg, float fNearPlane, float fFarPlane, CSHADER* 
     m_m4View = glm::lookAt(m_v3Position, m_v3Position + m_v3Orientation, m_v3Up);
     m_m4Projection = glm::perspective(glm::radians(fFOVdeg), (float)m_iWidth / (float)m_iHeight, fNearPlane, fFarPlane);
 
+    shader->Activate();
+    GLint location = glGetUniformLocation(shader->m_ID, uniform);
+    if (location == -1) {
+        std::cerr << "Uniform " << uniform << " not found! in matrix" << std::endl;
+    }
     glUniformMatrix4fv(glGetUniformLocation(shader->m_ID, uniform), 1, GL_FALSE, glm::value_ptr(m_m4Projection*m_m4View));
+    // shader->DeActivate();
 }
+
+void CCAMERA::updateCameraMatrix(int iWidth, int iHeight, float fFOVdeg, float fNearPlane, float fFarPlane, CSHADER* shader, const char* uniform) {
+    m_iHeight = iHeight;
+    m_iWidth = iWidth;
+
+    m_m4Projection = glm::perspective(glm::radians(fFOVdeg), (float)m_iWidth / (float)m_iHeight, fNearPlane, fFarPlane);
+    shader->Activate();
+    GLint location = glGetUniformLocation(shader->m_ID, uniform);
+    if (location == -1) {
+        std::cerr << "Uniform " << uniform << " not found! in updateCameraMatrix" << std::endl;
+    }
+    glUniformMatrix4fv(glGetUniformLocation(shader->m_ID, uniform), 1, GL_FALSE, glm::value_ptr(m_m4Projection*m_m4View));
+    shader->DeActivate();
+}
+
 
 void CCAMERA::updateCameraOrientation(float fYaw, float fPitch) {
     // Calculate the front vector for the camera based on the player's yaw and pitch

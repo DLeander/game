@@ -25,7 +25,7 @@
 
 struct SHEIGHT_DATA {
             unsigned char* s_pucData;  //the height data
-            int s_iSize;              //the height size (power of 2)
+            int s_iSize;              //the heightmap size (power of 2)
 
             SHEIGHT_DATA() : s_pucData(nullptr), s_iSize(0) {}
 };
