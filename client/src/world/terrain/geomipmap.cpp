@@ -11,46 +11,96 @@ void CGEOMIPMAP::render(CCAMERA* camera) {
 
     update(camera);
     m_terrainTexture->Bind();
-    for (int patch = 0; patch < m_iNumPatchesPerSide * m_iNumPatchesPerSide; patch++){
-        SGEOMM_PATCH* pCurr = &m_pPatches[patch];
-        // Set the model matrix
-        // Bind the VAO that stores vertex and color data
-        pCurr->m_VAOP->Bind();
-        int count;
-        switch (pCurr->m_iLOD) {
-            case 0:
-                m_EBOPLOD0->Bind();
-                count = m_vIndicesLOD0.size();
-                break;
-            case 1:
-                m_EBOPLOD1->Bind();
-                count = m_vIndicesLOD1.size();
-                break;
-            case 2:
-                m_EBOPLOD2->Bind();
-                count = m_vIndicesLOD2.size();
-                break;
-            case 3:
-                m_EBOPLOD3->Bind();
-                count = m_vIndicesLOD3.size();
-                break;
-            default:
-                m_EBOPLOD0->Bind();
-                count = m_vIndicesLOD0.size();
-                break;
+    for (SGEOMM_GRID* grid : m_vGridsToRender){
+        for (SGEOMM_PATCH* pCurr: grid->s_vPatches){
+            pCurr->m_VAOP->Bind();
+            int count;
+            switch (pCurr->m_iLOD) {
+                case 0:
+                    m_EBOPLOD0->Bind();
+                    count = m_vIndicesLOD0.size();
+                    break;
+                case 1:
+                    m_EBOPLOD1->Bind();
+                    count = m_vIndicesLOD1.size();
+                    break;
+                case 2:
+                    m_EBOPLOD2->Bind();
+                    count = m_vIndicesLOD2.size();
+                    break;
+                default:
+                    m_EBOPLOD0->Bind();
+                    count = m_vIndicesLOD0.size();
+                    break;
+            }
+            // Draw the patch
+            glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+            // Unbind the VAO
+            pCurr->m_VAOP->Unbind();
+            // Unbind EBO
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind EBO
         }
-        // Draw the patch
-        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
-        // Unbind the VAO
-        pCurr->m_VAOP->Unbind();
-        // Unbind EBO
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind EBO
     }
+    // for (int patch = 0; patch < m_iNumPatchesPerSide * m_iNumPatchesPerSide; patch++){
+    //     SGEOMM_PATCH* pCurr = &m_pPatches[patch];
+    //     // Set the model matrix
+    //     // Bind the VAO that stores vertex and color data
+    //     pCurr->m_VAOP->Bind();
+    //     int count;
+    //     switch (pCurr->m_iLOD) {
+    //         case 0:
+    //             m_EBOPLOD0->Bind();
+    //             count = m_vIndicesLOD0.size();
+    //             break;
+    //         case 1:
+    //             m_EBOPLOD1->Bind();
+    //             count = m_vIndicesLOD1.size();
+    //             break;
+    //         case 2:
+    //             m_EBOPLOD2->Bind();
+    //             count = m_vIndicesLOD2.size();
+    //             break;
+    //         default:
+    //             m_EBOPLOD0->Bind();
+    //             count = m_vIndicesLOD0.size();
+    //             break;
+    //     }
+    //     // Draw the patch
+    //     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+    //     // Unbind the VAO
+    //     pCurr->m_VAOP->Unbind();
+    //     // Unbind EBO
+    //     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind EBO
+    // }
     m_terrainShader->DeActivate();
     m_terrainTexture->Unbind();
 }
 
 void CGEOMIPMAP::update(CCAMERA* camera){
+    // Select grids to render:
+    m_vGridsToRender.clear();
+    for (int iGridZ = 0; iGridZ < m_iNumGridPerSide; iGridZ++){
+        for (int iGridX = 0; iGridX < m_iNumGridPerSide; iGridX++){
+            SGEOMM_GRID* gCurr = &m_Grids[iGridZ * m_iNumGridPerSide + iGridX];
+            if (camera->m_v3Position.x >= gCurr->s_v2GridTopLeftCoord.x && camera->m_v3Position.z >= gCurr->s_v2GridTopLeftCoord.y && camera->m_v3Position.x < gCurr->s_v2GridBottomRightCoord.x && camera->m_v3Position.z < gCurr->s_v2GridBottomRightCoord.y){
+                                                                       
+                                                                                       m_vGridsToRender.push_back(gCurr);
+                if (iGridX - 1 >= 0)                                                   m_vGridsToRender.push_back(&m_Grids[iGridZ * m_iNumGridPerSide + iGridX - 1]);
+                if (iGridX + 1 < m_iNumGridPerSide)                                    m_vGridsToRender.push_back(&m_Grids[iGridZ * m_iNumGridPerSide + iGridX + 1]);
+                
+                if (iGridZ - 1 >= 0)                                                   m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX]);
+                if (iGridZ - 1 >= 0 && iGridX - 1 >= 0)                                m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX - 1]);
+                if (iGridZ - 1 >= 0 && iGridX + 1 < m_iNumGridPerSide)                 m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX + 1]);
+                
+                if (iGridZ + 1 < m_iNumGridPerSide)                                   m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX]);
+                if (iGridZ + 1 < m_iNumGridPerSide && iGridX - 1 >= 0)                m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX - 1]);
+                if (iGridZ + 1 < m_iNumGridPerSide && iGridX + 1 < m_iNumGridPerSide) m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX + 1]);
+                break;
+            }
+        }
+    }
+
+    // For each Grid set information for each patch:
     for(int z = 0; z < m_iNumPatchesPerSide; z++){
         for(int x = 0; x < m_iNumPatchesPerSide; x++){
             glm::vec3 v3CurrPatch = glm::vec3(x*m_iPatchSize + m_iPatchSize/2, 0, z*m_iPatchSize + m_iPatchSize/2);
@@ -58,13 +108,10 @@ void CGEOMIPMAP::update(CCAMERA* camera){
             float fDistance = glm::distance(camera->m_v3Position, v3CurrPatch);
             // Compute LOD
             int iLOD = 0;
-            if (fDistance > 700){
-                iLOD = 1;
+            if(fDistance > 400){
+                iLOD = 2;
             }
-            else if(fDistance > 500){
-                iLOD = 1;
-            }
-            else if(fDistance > 300){
+            else if(fDistance > 200){
                 iLOD = 1;
             }
             else{
@@ -171,12 +218,16 @@ void CGEOMIPMAP::setupBuffers() {
 
     // We loop from 0 to m_iPatchSize-1 as we always need to have a triangle setup.
     // LOD 0 (Full resolution)
-    for (int i = 0; i < m_iPatchSize; i++) {
-        for (int j = 0; j < m_iPatchSize; j++) {
+    for (int i = 0; i < m_iPatchSize-1; i++) {
+        for (int j = 0; j < m_iPatchSize-1; j++) {
+            // int iTopLeft = i * (m_iPatchSize) + j;
+            // int iTopRight = i * (m_iPatchSize) + std::min(j + 1, m_iPatchSize - 1);
+            // int iBottomLeft = std::min(i + 1, m_iPatchSize - 1) * (m_iPatchSize) + j;
+            // int iBottomRight = std::min(i + 1, m_iPatchSize - 1) * (m_iPatchSize) + std::min(j + 1, m_iPatchSize - 1);
             int iTopLeft = i * (m_iPatchSize) + j;
-            int iTopRight = i * (m_iPatchSize) + std::min(j + 1, m_iPatchSize - 1);
-            int iBottomLeft = std::min(i + 1, m_iPatchSize - 1) * (m_iPatchSize) + j;
-            int iBottomRight = std::min(i + 1, m_iPatchSize - 1) * (m_iPatchSize) + std::min(j + 1, m_iPatchSize - 1);
+            int iTopRight = i * (m_iPatchSize) + j + 1;
+            int iBottomLeft = (i + 1) * (m_iPatchSize) + j;
+            int iBottomRight = (i + 1) * (m_iPatchSize) + j + 1;
 
             m_vIndicesLOD0.push_back(iTopLeft);
             m_vIndicesLOD0.push_back(iBottomLeft);
@@ -189,29 +240,16 @@ void CGEOMIPMAP::setupBuffers() {
 
     // LOD 1 (Half resolution)
     // Skirts start at the end of the vertices vector.
-    int iSkirtIndexTop = m_iPatchSize * m_iPatchSize;
+    int iSkirtIndexTop = (m_iPatchSize) * (m_iPatchSize);
     int iSkirtIndexLeft = m_iPatchSize * m_iPatchSize + m_iPatchSize;
     int iSkirtIndexRight = m_iPatchSize * m_iPatchSize + 2*(m_iPatchSize);
     int iSkirtIndexBottom = m_iPatchSize * m_iPatchSize + 3*(m_iPatchSize);
-    for (int i = 0; i < m_iPatchSize; i += 2) {
-        for (int j = 0; j < m_iPatchSize; j += 2) {
-
+    for (int i = 0; i < m_iPatchSize-3; i += 3) {
+        for (int j = 0; j < m_iPatchSize-3; j += 3) {
             int iTopLeft = i * m_iPatchSize + j;
-
-            int iTopRight = i * m_iPatchSize + std::min(j + 2, m_iPatchSize - 1); // Prevent out-of-bounds
-
-            int iBottomLeft = std::min(i + 2, m_iPatchSize - 1) * m_iPatchSize + j;
-
-            int iBottomRight = std::min(i + 2, m_iPatchSize - 1) * m_iPatchSize + std::min(j + 2, m_iPatchSize - 1);
-
-            // Avoid pushing indices out of bounds
-            if (iTopLeft >= m_iPatchSize * m_iPatchSize || 
-                iTopRight >= m_iPatchSize * m_iPatchSize || 
-                iBottomLeft >= m_iPatchSize * m_iPatchSize || 
-                iBottomRight >= m_iPatchSize * m_iPatchSize) {
-                std::cout << "Out of bounds: i=" << i << " j=" << j << std::endl;
-                continue;
-            }
+            int iTopRight = i * m_iPatchSize + j + 3;
+            int iBottomLeft = (i + 3) * m_iPatchSize + j;
+            int iBottomRight = (i + 3) * m_iPatchSize + j + 3;
 
             // Push the triangle indices
             m_vIndicesLOD1.push_back(iTopLeft);
@@ -231,65 +269,60 @@ void CGEOMIPMAP::setupBuffers() {
 
                 m_vIndicesLOD1.push_back(iTopRight);
                 m_vIndicesLOD1.push_back(iSkirtIndexTop);
-                m_vIndicesLOD1.push_back(iSkirtIndexTop + 2);
+                m_vIndicesLOD1.push_back(iSkirtIndexTop + 3);
 
-                iSkirtIndexTop += 2;
+                iSkirtIndexTop += 3;
             }
 
             if (j == 0 && iSkirtIndexLeft <  m_iPatchSize*m_iPatchSize + 2*(m_iPatchSize) - 1) { // Left Skirt
                 m_vIndicesLOD1.push_back(iSkirtIndexLeft);
-                m_vIndicesLOD1.push_back(iSkirtIndexLeft + 2);
+                m_vIndicesLOD1.push_back(iSkirtIndexLeft + 3);
                 m_vIndicesLOD1.push_back(iTopLeft);
 
                 m_vIndicesLOD1.push_back(iTopLeft);
-                m_vIndicesLOD1.push_back(iSkirtIndexLeft + 2);
+                m_vIndicesLOD1.push_back(iSkirtIndexLeft + 3);
                 m_vIndicesLOD1.push_back(iBottomLeft);
 
-                iSkirtIndexLeft += 2;
+                iSkirtIndexLeft += 3;
             }
 
-            if (j == m_iPatchSize - 1 && iSkirtIndexRight < m_iPatchSize*m_iPatchSize + 3*(m_iPatchSize) - 1) { // Right Skirt
+            if (j == m_iPatchSize - 3 - 1 && iSkirtIndexRight < m_iPatchSize*m_iPatchSize + 3*(m_iPatchSize) - 1) { // Right Skirt
                 m_vIndicesLOD1.push_back(iTopRight);
                 m_vIndicesLOD1.push_back(iSkirtIndexRight);
                 m_vIndicesLOD1.push_back(iBottomRight);
 
                 m_vIndicesLOD1.push_back(iSkirtIndexRight);
                 m_vIndicesLOD1.push_back(iBottomRight);
-                m_vIndicesLOD1.push_back(iSkirtIndexRight+2);
+                m_vIndicesLOD1.push_back(iSkirtIndexRight + 3);
 
-                iSkirtIndexRight += 2;
+                iSkirtIndexRight += 3;
             }
 
-            if (i == m_iPatchSize - 1 && iSkirtIndexBottom < m_iPatchSize*m_iPatchSize + 4*(m_iPatchSize) - 1) { // Bottom Skirt
+            if (i == m_iPatchSize - 3 - 1 && iSkirtIndexBottom < m_iPatchSize*m_iPatchSize + 4*(m_iPatchSize) - 1) { // Bottom Skirt
                 m_vIndicesLOD1.push_back(iBottomLeft);  // Top-left of the patch
                 m_vIndicesLOD1.push_back(iBottomRight); // Top-right of the patch
                 m_vIndicesLOD1.push_back(iSkirtIndexBottom);  // Bottom-left (skirt vertex)
 
                 m_vIndicesLOD1.push_back(iSkirtIndexBottom);   // Bottom-left (skirt vertex)
                 m_vIndicesLOD1.push_back(iBottomRight);  // Top-right of the patch
-                m_vIndicesLOD1.push_back(iSkirtIndexBottom + 2); // Bottom-right (skirt vertex)
+                m_vIndicesLOD1.push_back(iSkirtIndexBottom + 3); // Bottom-right (skirt vertex)
 
-                iSkirtIndexBottom += 2;
+                iSkirtIndexBottom += 3;
             }
         }
     }
 
+    iSkirtIndexTop = (m_iPatchSize) * (m_iPatchSize);
+    iSkirtIndexLeft = m_iPatchSize * m_iPatchSize + m_iPatchSize;
+    iSkirtIndexRight = m_iPatchSize * m_iPatchSize + 2*(m_iPatchSize);
+    iSkirtIndexBottom = m_iPatchSize * m_iPatchSize + 3*(m_iPatchSize);
     // LOD 2 (Quarter resolution)
-    for (int i = 0; i < m_iPatchSize; i += 4) {
-        for (int j = 0; j < m_iPatchSize; j += 4) {
+    for (int i = 0; i < m_iPatchSize - 7; i += 7) {
+        for (int j = 0; j < m_iPatchSize - 7; j += 7) {
             int iTopLeft = i * m_iPatchSize + j;
-            int iTopRight = i * m_iPatchSize + std::min(j + 4, m_iPatchSize - 1); // Prevent out-of-bounds
-            int iBottomLeft = std::min(i + 4, m_iPatchSize - 1) * m_iPatchSize + j;
-            int iBottomRight = std::min(i + 4, m_iPatchSize - 1) * m_iPatchSize + std::min(j + 4, m_iPatchSize - 1);
-
-            // Avoid pushing indices out of bounds
-            if (iTopLeft >= m_iPatchSize * m_iPatchSize || 
-                iTopRight >= m_iPatchSize * m_iPatchSize || 
-                iBottomLeft >= m_iPatchSize * m_iPatchSize || 
-                iBottomRight >= m_iPatchSize * m_iPatchSize) {
-                std::cout << "Out of bounds: i=" << i << " j=" << j << std::endl;
-                continue;
-            }
+            int iTopRight = i * m_iPatchSize + j + 7; // Prevent out-of-bounds
+            int iBottomLeft = (i + 7) * m_iPatchSize + j;
+            int iBottomRight = (i + 7) * m_iPatchSize + j + 7;
 
             // Push the triangle indices
             m_vIndicesLOD2.push_back(iTopLeft);
@@ -299,43 +332,100 @@ void CGEOMIPMAP::setupBuffers() {
             m_vIndicesLOD2.push_back(iTopRight);
             m_vIndicesLOD2.push_back(iBottomLeft);
             m_vIndicesLOD2.push_back(iBottomRight);
-        }
-    }
 
-    // LOD 3 (Eighth resolution)
-    for (int i = 0; i < m_iPatchSize; i += 8) {
-        for (int j = 0; j < m_iPatchSize; j += 8) {
-            int iTopLeft = i * m_iPatchSize + j;
-            int iTopRight = i * m_iPatchSize + std::min(j + 8, m_iPatchSize - 1); // Prevent out-of-bounds
-            int iBottomLeft = std::min(i + 8, m_iPatchSize - 1) * m_iPatchSize + j;
-            int iBottomRight = std::min(i + 8, m_iPatchSize - 1) * m_iPatchSize + std::min(j + 8, m_iPatchSize - 1);
+            // **Skirt Indices for LOD Cracks**
+            if (i == 0 && iSkirtIndexTop < m_iPatchSize*m_iPatchSize + m_iPatchSize - 1) {  // Top Skirt
+                m_vIndicesLOD2.push_back(iTopLeft);
+                m_vIndicesLOD2.push_back(iSkirtIndexTop);
+                m_vIndicesLOD2.push_back(iTopRight);
 
-            // Avoid pushing indices out of bounds
-            if (iTopLeft >= m_iPatchSize * m_iPatchSize || 
-                iTopRight >= m_iPatchSize * m_iPatchSize || 
-                iBottomLeft >= m_iPatchSize * m_iPatchSize || 
-                iBottomRight >= m_iPatchSize * m_iPatchSize) {
-                std::cout << "Out of bounds: i=" << i << " j=" << j << std::endl;
-                continue;
+                m_vIndicesLOD2.push_back(iTopRight);
+                m_vIndicesLOD2.push_back(iSkirtIndexTop);
+                m_vIndicesLOD2.push_back(iSkirtIndexTop + 7);
+
+                iSkirtIndexTop += 7;
             }
 
-            // Push the triangle indices
-            m_vIndicesLOD3.push_back(iTopLeft);
-            m_vIndicesLOD3.push_back(iBottomLeft);
-            m_vIndicesLOD3.push_back(iTopRight);
+            if (j == 0 && iSkirtIndexLeft <  m_iPatchSize*m_iPatchSize + 2*(m_iPatchSize) - 1) { // Left Skirt
+                m_vIndicesLOD2.push_back(iSkirtIndexLeft);
+                m_vIndicesLOD2.push_back(iSkirtIndexLeft + 7);
+                m_vIndicesLOD2.push_back(iTopLeft);
 
-            m_vIndicesLOD3.push_back(iTopRight);
-            m_vIndicesLOD3.push_back(iBottomLeft);
-            m_vIndicesLOD3.push_back(iBottomRight);
+                m_vIndicesLOD2.push_back(iTopLeft);
+                m_vIndicesLOD2.push_back(iSkirtIndexLeft + 7);
+                m_vIndicesLOD2.push_back(iBottomLeft);
+
+                iSkirtIndexLeft += 7;
+            }
+
+            if (j == m_iPatchSize - 7 - 1 && iSkirtIndexRight < m_iPatchSize*m_iPatchSize + 3*(m_iPatchSize) - 1) { // Right Skirt
+                m_vIndicesLOD2.push_back(iTopRight);
+                m_vIndicesLOD2.push_back(iSkirtIndexRight);
+                m_vIndicesLOD2.push_back(iBottomRight);
+
+                m_vIndicesLOD2.push_back(iSkirtIndexRight);
+                m_vIndicesLOD2.push_back(iBottomRight);
+                m_vIndicesLOD2.push_back(iSkirtIndexRight + 7);
+
+                iSkirtIndexRight += 7;
+            }
+
+            if (i == m_iPatchSize - 7 - 1 && iSkirtIndexBottom < m_iPatchSize*m_iPatchSize + 4*(m_iPatchSize) - 1) { // Bottom Skirt
+                m_vIndicesLOD2.push_back(iBottomLeft);  // Top-left of the patch
+                m_vIndicesLOD2.push_back(iBottomRight); // Top-right of the patch
+                m_vIndicesLOD2.push_back(iSkirtIndexBottom);  // Bottom-left (skirt vertex)
+
+                m_vIndicesLOD2.push_back(iSkirtIndexBottom);   // Bottom-left (skirt vertex)
+                m_vIndicesLOD2.push_back(iBottomRight);  // Top-right of the patch
+                m_vIndicesLOD2.push_back(iSkirtIndexBottom + 7); // Bottom-right (skirt vertex)
+
+                iSkirtIndexBottom += 7;
+            }
         }
     }
     // Create the EBOs for each LOD
     m_EBOPLOD0 = new CEBO(m_vIndicesLOD0.data(), m_vIndicesLOD0.size() * sizeof(unsigned int));
     m_EBOPLOD1 = new CEBO(m_vIndicesLOD1.data(), m_vIndicesLOD1.size() * sizeof(unsigned int));
     m_EBOPLOD2 = new CEBO(m_vIndicesLOD2.data(), m_vIndicesLOD2.size() * sizeof(unsigned int));
-    m_EBOPLOD3 = new CEBO(m_vIndicesLOD3.data(), m_vIndicesLOD3.size() * sizeof(unsigned int));
 
-    std::cout << "Buffers setup" << std::endl;
+    std::cout << "Buffers setup finished." << std::endl;
+}
+
+void CGEOMIPMAP::setupGrids(){
+    // A grid is currently 4 patches and are stored consecutive in memory. The grid is therefore: [G1,G1,G1,G1, G2,G2,G2,G2, G3,G3,G3,G3, ... , GN,GN,GN,GN]
+    // So for each grid we should be able to store each patch from sPatch array without problem, if we account for the row mismatch.
+    int iCurrentPatchZ = 0;
+    int iCurrentPatchX = 0;
+    for (int iz = 0; iz < m_iNumGridPerSide; iz++){
+        iCurrentPatchX = 0;
+        for (int ix = 0; ix < m_iNumGridPerSide; ix++){
+            if (iCurrentPatchX + 1 >= m_iNumPatchesPerSide || iCurrentPatchZ + 1 >= m_iNumPatchesPerSide) {
+                continue; // Skip out-of-bounds grids
+            }
+            // Get the current grid.
+            SGEOMM_GRID* gCurr = &m_Grids[iz * m_iNumGridPerSide + ix];
+            gCurr->s_vPatches.push_back(&m_pPatches[iCurrentPatchZ * m_iNumPatchesPerSide + iCurrentPatchX]);
+            gCurr->s_vPatches.push_back(&m_pPatches[iCurrentPatchZ * m_iNumPatchesPerSide + iCurrentPatchX+1]);
+            gCurr->s_vPatches.push_back(&m_pPatches[(iCurrentPatchZ+1) * m_iNumPatchesPerSide + iCurrentPatchX]);
+            gCurr->s_vPatches.push_back(&m_pPatches[(iCurrentPatchZ+1) * m_iNumPatchesPerSide + iCurrentPatchX+1]);
+            
+            float fXTL = iCurrentPatchX * m_iPatchSize;   // Grid's top-left x-coordinate
+            float fZTL = iCurrentPatchZ * m_iPatchSize;  // Grid's top-left z-coordinate
+            float fXBR = (iCurrentPatchX + 2) * m_iPatchSize; // Grid's bottom-right x-coordinate
+            float fZBR = (iCurrentPatchZ + 2) * m_iPatchSize; // Grid's bottom-right z-coordinate
+
+            gCurr->s_v2GridTopLeftCoord = glm::vec2(fXTL, fZTL);
+            gCurr->s_v2GridBottomRightCoord = glm::vec2(fXBR, fZBR);
+
+            // std::cout << "Grid: " << iz * m_iNumGridPerSide + ix << " and patches: " << iCurrentPatchZ * m_iNumPatchesPerSide + iCurrentPatchX << " " << iCurrentPatchZ * m_iNumPatchesPerSide + iCurrentPatchX+1
+            // << " " << (iCurrentPatchZ+1) * m_iNumPatchesPerSide + iCurrentPatchX << " " << (iCurrentPatchZ+1) * m_iNumPatchesPerSide + iCurrentPatchX+1 << std::endl;
+            // std::cout << "TopLeft Coord: " << fXTL << ", " << fZTL << " and BottomRight Coord: " << fXBR << ", " << fZBR << std::endl;
+
+            iCurrentPatchX += 2;
+        }
+        iCurrentPatchZ += 2;
+    }
+    std::cout << "Grids setup finished." << std::endl;
 }
 
 void CGEOMIPMAP::createTextureFromHeightMap() {
@@ -363,6 +453,9 @@ void CGEOMIPMAP::createTextureFromHeightMap() {
 }
 
 CGEOMIPMAP::~CGEOMIPMAP(){
+    if (m_Grids){
+        delete[] m_Grids;
+    }
     if (m_pPatches){
         for (int i = 0; i < m_iNumPatchesPerSide * m_iNumPatchesPerSide; i++){
             if (m_pPatches[i].m_VAOP) {
@@ -388,5 +481,4 @@ CGEOMIPMAP::~CGEOMIPMAP(){
     if (m_EBOPLOD0){m_EBOPLOD0->Delete(); delete m_EBOPLOD0; m_EBOPLOD0 = nullptr;}
     if (m_EBOPLOD1){m_EBOPLOD1->Delete(); delete m_EBOPLOD1; m_EBOPLOD1 = nullptr;}
     if (m_EBOPLOD2){m_EBOPLOD2->Delete(); delete m_EBOPLOD2; m_EBOPLOD2 = nullptr;}
-    if (m_EBOPLOD3){m_EBOPLOD3->Delete(); delete m_EBOPLOD3; m_EBOPLOD3 = nullptr;}
 }

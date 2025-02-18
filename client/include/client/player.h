@@ -73,6 +73,7 @@ class CPLAYER {
         bool m_bIsGrounded = false;
         float m_fGravity = 0.000009f;
         float m_fJumpForce = 0.005f;
+        bool m_bNoClip = false;
 
         // Methods
 };

@@ -55,7 +55,7 @@ void framebuffer_size_callback(GLFWwindow* window, int iWidth, int iHeight) {
     glViewport(0, 0, iWidth, iHeight); // Adjust the OpenGL viewport
     CCLIENT* client = static_cast<CCLIENT*>(glfwGetWindowUserPointer(window));
     if (client != nullptr){        
-        client->getCamera()->updateCameraMatrix(iWidth, iHeight, 90.0f, 0.1f, 300.0f, client->getPlayerShader(), "camMatrix");
+        client->getCamera()->updateCameraMatrix(iWidth, iHeight, 90.0f, 0.1f, 1000.0f, client->getPlayerShader(), "camMatrix");
         client->setWindowWidth(iWidth);
         client->setWindowHeight(iHeight);
     }
@@ -124,7 +124,8 @@ void CCLIENT::init(){
 	// Specify the viewport of OpenGL in the Window
 	// In this case the viewport goes from x = 0, y = 0, to x = 800, y = 800
 	glViewport(0, 0, m_iWindowWidth, m_iWindowHeight);
-    // Enables the Depth Buffer
+
+    // // Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
@@ -136,8 +137,9 @@ void CCLIENT::init(){
     m_player = new CPLAYER(m_playerShader);
 
     // HEIGHTMAP SIZE = (2^n - 1) by (2^n - 1) but inputted heightmap should be 2^n by 2^n, with patch size (2^n - 1) to get correct sized triangles making up terrain. 
-    m_terrain.init("resources/terrain/heightmap_512.raw", 512, 0.1f);
-    // m_player->getTerrainCollision().setHeightData(m_terrain.getHeightData());
+    // m_terrain.init("resources/terrain/RuggedTerrain_512.raw", 512, 0.1f);
+    m_terrain.init("resources/terrain/Rugged_Terrain_Rocky_4096.raw", 4096, 0.1f);
+    // m_terrain.init("resources/terrain/test_black_64.raw", 64, 0.1f);
 
     glfwSetWindowUserPointer(m_window, this);
 }

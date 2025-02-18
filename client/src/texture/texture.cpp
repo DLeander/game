@@ -49,7 +49,7 @@ Texture::Texture(unsigned char* texture, GLenum type, GLenum slot, GLenum format
     glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    glTexImage2D(type, 0, GL_RGBA, m_iTextureWidth, m_iTextureHeight, 0, format, pixelType, texture);
+    glTexImage2D(type, 0, GL_RGB, m_iTextureWidth, m_iTextureHeight, 0, format, pixelType, texture);
     glGenerateMipmap(type);
 
     glBindTexture(type, 0);

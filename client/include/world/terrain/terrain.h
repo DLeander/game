@@ -67,6 +67,7 @@ class CTERRAIN {
     virtual void render( CCAMERA* camera ) = 0;
     virtual void setupBuffers() = 0;
     virtual void createTextureFromHeightMap() = 0;
+    virtual void setupGrids() = 0;
 
     // Init the terrain
     void init(const char* filename, int iSize, float fHeightScale);
@@ -93,7 +94,7 @@ class CTERRAIN {
     // Set the true height value at the given point-ucHeight: the new height value for the point-iX, iZ: which height value to retrieve
     inline void setHeightAtPoint(unsigned char height, int iX, int iZ) { m_heightData.s_pucData[iX + iZ * m_iSize] = height; }
     // A function to get the true height value (0-255) at a point
-    inline unsigned char getTrueHeightAtPoint(int iX, int iZ) { return m_heightData.s_pucData[iX + iZ * m_iSize]; }
+    inline unsigned char getTrueHeightAtPoint(int iX, int iZ) { if (iX >= 0 && iZ >= 0 && iX < m_iSize && iZ < m_iSize) return m_heightData.s_pucData[iX + iZ * m_iSize]; else return 0;}
     // Retrieve the scaled height at a given point
     inline float getScaledHeightAtPoint(int iX, int iZ) { return m_heightData.s_pucData[iX + iZ * m_iSize] * m_fHeightScale; }
     SHEIGHT_DATA getHeightData(){return m_heightData;}

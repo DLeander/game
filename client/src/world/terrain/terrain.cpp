@@ -15,7 +15,7 @@ void CTERRAIN::init(const char* filename, int size, float fHeightScale){
     loadHeightMap(filename, size);
     setupShader();
     setupBuffers();
-
+    setupGrids();
     // Setup the texture
     createTextureFromHeightMap();
 
