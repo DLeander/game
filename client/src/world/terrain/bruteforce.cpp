@@ -7,7 +7,7 @@ CBRUTEFORCE::~CBRUTEFORCE(){
         if (m_terrainColorVBO){m_terrainColorVBO->Delete(); delete m_terrainColorVBO; m_terrainColorVBO = nullptr;}
     }
 
-void CBRUTEFORCE::render(CCAMERA* camera) {
+void CBRUTEFORCE::render(CCAMERA* camera, glm::vec3 v3PlayerPosition) {
     // Activate shader program
     m_terrainShader->Activate();  // Ensure shader is correctly set up
     camera->matrix(45.0f, 0.1f, 300.0f, m_terrainShader, "camMatrix");

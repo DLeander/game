@@ -17,7 +17,7 @@ public:
     ~CBRUTEFORCE();
 
     // Implement the Render method from Terrain
-    void render(CCAMERA* camera) override;
+    void render(CCAMERA* camera, glm::vec3 v3PlayerPosition) override;
     void setupBuffers() override;
     void createTextureFromHeightMap() override;
 

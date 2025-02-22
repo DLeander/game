@@ -1,6 +1,6 @@
 #include "geomipmap.h"
 
-void CGEOMIPMAP::render(CCAMERA* camera) {
+void CGEOMIPMAP::render(CCAMERA* camera, glm::vec3 v3PlayerPosition) {
     // Activate shader program
     m_terrainShader->Activate();
     camera->matrix(45.0f, 0.1f, 750.0f, m_terrainShader, "camMatrix");
@@ -9,7 +9,7 @@ void CGEOMIPMAP::render(CCAMERA* camera) {
         std::cerr << "Uniform 'camMatrix' not found in shader." << std::endl;
     }
 
-    update(camera);
+    update(camera, v3PlayerPosition);
     m_terrainTexture->Bind();
     for (SGEOMM_GRID* grid : m_vGridsToRender){
         for (SGEOMM_PATCH* pCurr: grid->s_vPatches){
@@ -76,13 +76,13 @@ void CGEOMIPMAP::render(CCAMERA* camera) {
     m_terrainTexture->Unbind();
 }
 
-void CGEOMIPMAP::update(CCAMERA* camera){
+void CGEOMIPMAP::update(CCAMERA* camera, glm::vec3 v3PlayerPosition){
     // Select grids to render:
     m_vGridsToRender.clear();
     for (int iGridZ = 0; iGridZ < m_iNumGridPerSide; iGridZ++){
         for (int iGridX = 0; iGridX < m_iNumGridPerSide; iGridX++){
             SGEOMM_GRID* gCurr = &m_Grids[iGridZ * m_iNumGridPerSide + iGridX];
-            if (camera->m_v3Position.x >= gCurr->s_v2GridTopLeftCoord.x && camera->m_v3Position.z >= gCurr->s_v2GridTopLeftCoord.y && camera->m_v3Position.x < gCurr->s_v2GridBottomRightCoord.x && camera->m_v3Position.z < gCurr->s_v2GridBottomRightCoord.y){
+            if (v3PlayerPosition.x >= gCurr->s_v2GridTopLeftCoord.x && v3PlayerPosition.z >= gCurr->s_v2GridTopLeftCoord.y && v3PlayerPosition.x < gCurr->s_v2GridBottomRightCoord.x && v3PlayerPosition.z < gCurr->s_v2GridBottomRightCoord.y){
                                                                        
                                                                                        m_vGridsToRender.push_back(gCurr);
                 if (iGridX - 1 >= 0)                                                   m_vGridsToRender.push_back(&m_Grids[iGridZ * m_iNumGridPerSide + iGridX - 1]);

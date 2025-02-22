@@ -64,7 +64,7 @@ class CTERRAIN {
     // Destructor
     ~CTERRAIN();
 
-    virtual void render( CCAMERA* camera ) = 0;
+    virtual void render( CCAMERA* camera, glm::vec3 v3PlayerPosition ) = 0;
     virtual void setupBuffers() = 0;
     virtual void createTextureFromHeightMap() = 0;
     virtual void setupGrids() = 0;

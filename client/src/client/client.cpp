@@ -211,7 +211,7 @@ void CCLIENT::renderPlayers(){
 }
 
  void CCLIENT::renderWorld(){
-    m_terrain.render(m_camera);
+    m_terrain.render(m_camera, m_player->m_v3Position);
  }
 
 void CCLIENT::sendPlayerInfo(){

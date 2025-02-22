@@ -42,11 +42,11 @@ public:
     ~CGEOMIPMAP();
 
     // Implement the Render method from Terrain
-    void render(CCAMERA* camera) override;
+    void render(CCAMERA* camera, glm::vec3 v3PlayerPosition) override;
     void setupBuffers() override;
     void createTextureFromHeightMap() override;
     void setupGrids() override;
-    void update(CCAMERA* camera);
+    void update(CCAMERA* camera, glm::vec3 v3PlayerPosition);
 
 private:
     // Variables
