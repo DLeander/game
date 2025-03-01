@@ -13,7 +13,7 @@ void CGEOMIPMAP::render(CCAMERA* camera, glm::vec3 v3PlayerPosition) {
     m_terrainTexture->Bind();
     for (SGEOMM_GRID* grid : m_vGridsToRender){
         for (SGEOMM_PATCH* pCurr: grid->s_vPatches){
-            pCurr->m_VAOP->Bind();
+            pCurr->VAOP->Bind();
             int count;
             switch (pCurr->m_iLOD) {
                 case 0:
@@ -36,42 +36,11 @@ void CGEOMIPMAP::render(CCAMERA* camera, glm::vec3 v3PlayerPosition) {
             // Draw the patch
             glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
             // Unbind the VAO
-            pCurr->m_VAOP->Unbind();
+            pCurr->VAOP->Unbind();
             // Unbind EBO
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind EBO
         }
     }
-    // for (int patch = 0; patch < m_iNumPatchesPerSide * m_iNumPatchesPerSide; patch++){
-    //     SGEOMM_PATCH* pCurr = &m_pPatches[patch];
-    //     // Set the model matrix
-    //     // Bind the VAO that stores vertex and color data
-    //     pCurr->m_VAOP->Bind();
-    //     int count;
-    //     switch (pCurr->m_iLOD) {
-    //         case 0:
-    //             m_EBOPLOD0->Bind();
-    //             count = m_vIndicesLOD0.size();
-    //             break;
-    //         case 1:
-    //             m_EBOPLOD1->Bind();
-    //             count = m_vIndicesLOD1.size();
-    //             break;
-    //         case 2:
-    //             m_EBOPLOD2->Bind();
-    //             count = m_vIndicesLOD2.size();
-    //             break;
-    //         default:
-    //             m_EBOPLOD0->Bind();
-    //             count = m_vIndicesLOD0.size();
-    //             break;
-    //     }
-    //     // Draw the patch
-    //     glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
-    //     // Unbind the VAO
-    //     pCurr->m_VAOP->Unbind();
-    //     // Unbind EBO
-    //     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // Unbind EBO
-    // }
     m_terrainShader->DeActivate();
     m_terrainTexture->Unbind();
 }
@@ -82,21 +51,22 @@ void CGEOMIPMAP::update(CCAMERA* camera, glm::vec3 v3PlayerPosition){
     for (int iGridZ = 0; iGridZ < m_iNumGridPerSide; iGridZ++){
         for (int iGridX = 0; iGridX < m_iNumGridPerSide; iGridX++){
             SGEOMM_GRID* gCurr = &m_Grids[iGridZ * m_iNumGridPerSide + iGridX];
-            if (v3PlayerPosition.x >= gCurr->s_v2GridTopLeftCoord.x && v3PlayerPosition.z >= gCurr->s_v2GridTopLeftCoord.y && v3PlayerPosition.x < gCurr->s_v2GridBottomRightCoord.x && v3PlayerPosition.z < gCurr->s_v2GridBottomRightCoord.y){
+            m_vGridsToRender.push_back(gCurr);
+            // if (v3PlayerPosition.x >= gCurr->s_v2GridTopLeftCoord.x && v3PlayerPosition.z >= gCurr->s_v2GridTopLeftCoord.y && v3PlayerPosition.x < gCurr->s_v2GridBottomRightCoord.x && v3PlayerPosition.z < gCurr->s_v2GridBottomRightCoord.y){
                                                                        
-                                                                                       m_vGridsToRender.push_back(gCurr);
-                if (iGridX - 1 >= 0)                                                   m_vGridsToRender.push_back(&m_Grids[iGridZ * m_iNumGridPerSide + iGridX - 1]);
-                if (iGridX + 1 < m_iNumGridPerSide)                                    m_vGridsToRender.push_back(&m_Grids[iGridZ * m_iNumGridPerSide + iGridX + 1]);
+            //                                                                            m_vGridsToRender.push_back(gCurr);
+            //     if (iGridX - 1 >= 0)                                                   m_vGridsToRender.push_back(&m_Grids[iGridZ * m_iNumGridPerSide + iGridX - 1]);
+            //     if (iGridX + 1 < m_iNumGridPerSide)                                    m_vGridsToRender.push_back(&m_Grids[iGridZ * m_iNumGridPerSide + iGridX + 1]);
                 
-                if (iGridZ - 1 >= 0)                                                   m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX]);
-                if (iGridZ - 1 >= 0 && iGridX - 1 >= 0)                                m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX - 1]);
-                if (iGridZ - 1 >= 0 && iGridX + 1 < m_iNumGridPerSide)                 m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX + 1]);
+            //     if (iGridZ - 1 >= 0)                                                   m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX]);
+            //     if (iGridZ - 1 >= 0 && iGridX - 1 >= 0)                                m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX - 1]);
+            //     if (iGridZ - 1 >= 0 && iGridX + 1 < m_iNumGridPerSide)                 m_vGridsToRender.push_back(&m_Grids[(iGridZ-1) * m_iNumGridPerSide + iGridX + 1]);
                 
-                if (iGridZ + 1 < m_iNumGridPerSide)                                   m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX]);
-                if (iGridZ + 1 < m_iNumGridPerSide && iGridX - 1 >= 0)                m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX - 1]);
-                if (iGridZ + 1 < m_iNumGridPerSide && iGridX + 1 < m_iNumGridPerSide) m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX + 1]);
-                break;
-            }
+            //     if (iGridZ + 1 < m_iNumGridPerSide)                                   m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX]);
+            //     if (iGridZ + 1 < m_iNumGridPerSide && iGridX - 1 >= 0)                m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX - 1]);
+            //     if (iGridZ + 1 < m_iNumGridPerSide && iGridX + 1 < m_iNumGridPerSide) m_vGridsToRender.push_back(&m_Grids[(iGridZ+1) * m_iNumGridPerSide + iGridX + 1]);
+            //     break;
+            // }
         }
     }
 
@@ -124,6 +94,13 @@ void CGEOMIPMAP::update(CCAMERA* camera, glm::vec3 v3PlayerPosition){
     }
 }
 
+void getAtlasTextureOffset(int iAtlasIndex, int iAtlasRowSize, std::vector<float>& vTextureAtlasOffsets){
+    int iColumn = iAtlasIndex % iAtlasRowSize;
+    int iRow = iAtlasIndex / iAtlasRowSize;
+    vTextureAtlasOffsets.push_back(float(iColumn) / float(iAtlasRowSize));
+    vTextureAtlasOffsets.push_back(float(iRow) / float(iAtlasRowSize));
+}
+
 void CGEOMIPMAP::setupBuffers() {
     // Setup EBOs for each LOD (CALL ONCE)
     // This local vector stores skirt vertices which are then added to the end of vVertices so that it will be easier to NOT generate them for certain LODS.
@@ -131,6 +108,12 @@ void CGEOMIPMAP::setupBuffers() {
     std::vector<float> vSkirtVerticesLeft;
     std::vector<float> vSkirtVerticesRight;
     std::vector<float> vSkirtVerticesBottom;
+
+    std::vector<float> vSkirtTexOffsetsTop;
+    std::vector<float> vSkirtTexOffsetsLeft;
+    std::vector<float> vSkirtTexOffsetsRight;
+    std::vector<float> vSkirtTexOffsetsBottom;
+
     int iSkirtHeight = 2.0f;
     // For each patch, go through its vertices and create an index buffer
     for (int z = 0; z < m_iNumPatchesPerSide; z++) {
@@ -139,13 +122,18 @@ void CGEOMIPMAP::setupBuffers() {
             vSkirtVerticesLeft.clear();
             vSkirtVerticesRight.clear();
             vSkirtVerticesBottom.clear();
+            vSkirtTexOffsetsTop.clear();
+            vSkirtTexOffsetsLeft.clear();
+            vSkirtTexOffsetsRight.clear();
+            vSkirtTexOffsetsBottom.clear();
 
             // Get the current patch and compute its vertices.
             SGEOMM_PATCH* pCurr = &m_pPatches[z * m_iNumPatchesPerSide + x];
-            pCurr->m_vVertices.clear();
-            pCurr->m_vTexCoords.clear();
-            pCurr->m_vVertices.resize(m_iPatchSize * m_iPatchSize * 3); // Pre-allocate memory for terrain vertices
-            pCurr->m_vTexCoords.resize(m_iPatchSize * m_iPatchSize * 2); // Pre-allocate memory texture coordinates
+            pCurr->vVertices.clear();
+            pCurr->vTexCoords.clear();
+            pCurr->vTexOffsets.clear();
+            pCurr->vVertices.resize(m_iPatchSize * m_iPatchSize * 3); // Pre-allocate memory for terrain vertices
+            pCurr->vTexCoords.resize(m_iPatchSize * m_iPatchSize * 2); // Pre-allocate memory texture coordinates
 
             // Compute the vertices
             for (int i = 0; i < m_iPatchSize; i++) {
@@ -154,58 +142,93 @@ void CGEOMIPMAP::setupBuffers() {
                     float fX = x * (m_iPatchSize - 1) + j;
                     float fZ = z * (m_iPatchSize - 1) + i;
                     float fY = getTrueHeightAtPoint(fX, fZ);
-                    
+
+                    // Generate atlas offsets given height.
+                    int atlasIndex;
+                    if (fY >= 95){
+                        atlasIndex = 1; // Snow
+                    }
+                    else if (fY >= 85){
+                        atlasIndex = 0; // Rock
+                    }
+                    else if (fY >= 70){
+                        atlasIndex = 2; // Grass
+                    }
+                    else{
+                        atlasIndex = 3; // Dirt
+                    }
+                    getAtlasTextureOffset(atlasIndex, 2, pCurr->vTexOffsets);
+
                     // Index to place the vertex in the vector
                     int iVIndex = (i * m_iPatchSize + j) * 3; // 3 components per vertex
-                    pCurr->m_vVertices[iVIndex] = fX; // X coordinate
-                    pCurr->m_vVertices[iVIndex+1] = fY; // Y coordinate
-                    pCurr->m_vVertices[iVIndex+2] = fZ; // Z coordinate
+                    pCurr->vVertices[iVIndex] = fX; // X coordinate
+                    pCurr->vVertices[iVIndex+1] = fY; // Y coordinate
+                    pCurr->vVertices[iVIndex+2] = fZ; // Z coordinate
 
                     int iCIndex = (i * m_iPatchSize + j) * 2;
-                    pCurr->m_vTexCoords[iCIndex] = (static_cast<float>(fX) / (m_iSize));
-                    pCurr->m_vTexCoords[iCIndex+1] = (static_cast<float>(fZ) / (m_iSize));
+                    pCurr->vTexCoords[iCIndex] = (static_cast<float>(j) / (m_iPatchSize-1));
+                    pCurr->vTexCoords[iCIndex+1] = (static_cast<float>(i) / (m_iPatchSize-1));
+                    pCurr->vTexCoords[iCIndex] *= 0.9f;  // Slightly scale inside
+                    pCurr->vTexCoords[iCIndex + 1] *= 0.9f;
 
                     if (i == 0){
                         vSkirtVerticesTop.push_back(fX);
                         vSkirtVerticesTop.push_back(fY - iSkirtHeight); // Lowered height
                         vSkirtVerticesTop.push_back(fZ);
+
+                        getAtlasTextureOffset(atlasIndex, 2, vSkirtTexOffsetsTop);
                     }
                     if (j == 0){
                         vSkirtVerticesLeft.push_back(fX);
                         vSkirtVerticesLeft.push_back(fY - iSkirtHeight); // Lowered height
                         vSkirtVerticesLeft.push_back(fZ);
+
+                        getAtlasTextureOffset(atlasIndex, 2, vSkirtTexOffsetsLeft);
                     }
                     if (j == m_iPatchSize - 1){
                         vSkirtVerticesRight.push_back(fX);
                         vSkirtVerticesRight.push_back(fY - iSkirtHeight); // Lowered height
                         vSkirtVerticesRight.push_back(fZ);
+
+                        getAtlasTextureOffset(atlasIndex, 2, vSkirtTexOffsetsRight);
                     }
                     if (i == m_iPatchSize - 1){
                         vSkirtVerticesBottom.push_back(fX);
                         vSkirtVerticesBottom.push_back(fY - iSkirtHeight); // Lowered height
                         vSkirtVerticesBottom.push_back(fZ);
+
+                        getAtlasTextureOffset(atlasIndex, 2, vSkirtTexOffsetsBottom);
                     }
                 }
             }
             // Add the skirts to the end of the vertices vector. ORDER IS: TOP LEFT RIGHT BOTTOM (Should be 32 of each)
-            pCurr->m_vVertices.insert(pCurr->m_vVertices.end(), vSkirtVerticesTop.begin(), vSkirtVerticesTop.end());
-            pCurr->m_vVertices.insert(pCurr->m_vVertices.end(), vSkirtVerticesLeft.begin(), vSkirtVerticesLeft.end());
-            pCurr->m_vVertices.insert(pCurr->m_vVertices.end(), vSkirtVerticesRight.begin(), vSkirtVerticesRight.end());
-            pCurr->m_vVertices.insert(pCurr->m_vVertices.end(), vSkirtVerticesBottom.begin(), vSkirtVerticesBottom.end());
+            pCurr->vVertices.insert(pCurr->vVertices.end(), vSkirtVerticesTop.begin(), vSkirtVerticesTop.end());
+            pCurr->vVertices.insert(pCurr->vVertices.end(), vSkirtVerticesLeft.begin(), vSkirtVerticesLeft.end());
+            pCurr->vVertices.insert(pCurr->vVertices.end(), vSkirtVerticesRight.begin(), vSkirtVerticesRight.end());
+            pCurr->vVertices.insert(pCurr->vVertices.end(), vSkirtVerticesBottom.begin(), vSkirtVerticesBottom.end());
 
-            pCurr->m_VAOP = new CVAO();
-            pCurr->m_VAOP->Bind();
-            pCurr->m_VBOP = new CVBO(pCurr->m_vVertices.data(), pCurr->m_vVertices.size() * sizeof(float));
-            pCurr->m_VBOP->Bind();
-            pCurr->m_VBOPT = new CVBO(pCurr->m_vTexCoords.data(), pCurr->m_vTexCoords.size() * sizeof(float));
-            pCurr->m_VBOPT->Bind();
+            // pCurr->vTexOffsets.insert(pCurr->vTexOffsets.end(), vSkirtTexOffsetsTop.begin(), vSkirtTexOffsetsTop.end());
+            // pCurr->vTexOffsets.insert(pCurr->vTexOffsets.end(), vSkirtTexOffsetsLeft.begin(), vSkirtTexOffsetsLeft.end());
+            // pCurr->vTexOffsets.insert(pCurr->vTexOffsets.end(), vSkirtTexOffsetsRight.begin(), vSkirtTexOffsetsRight.end());
+            // pCurr->vTexOffsets.insert(pCurr->vTexOffsets.end(), vSkirtTexOffsetsBottom.begin(), vSkirtTexOffsetsBottom.end());
+
+            pCurr->VAOP = new CVAO();
+            pCurr->VAOP->Bind();
+            pCurr->VBOP = new CVBO(pCurr->vVertices.data(), pCurr->vVertices.size() * sizeof(float));
+            pCurr->VBOP->Bind();
+            pCurr->VBOPT = new CVBO(pCurr->vTexCoords.data(), pCurr->vTexCoords.size() * sizeof(float));
+            pCurr->VBOPT->Bind();
+            pCurr->VBOTH = new CVBO(pCurr->vTexOffsets.data(), pCurr->vTexOffsets.size() * sizeof(float));
+            pCurr->VBOTH->Bind();
             // Link the vertices and the texture coordinates to the VAO of the patch.
-            pCurr->m_VAOP->LinkAttrib(*pCurr->m_VBOP, 0, 3, GL_FLOAT, 0, (void*)0);
-            pCurr->m_VAOP->LinkAttrib(*pCurr->m_VBOPT, 2, 2, GL_FLOAT, 0, (void*)0);
+            pCurr->VAOP->LinkAttrib(*pCurr->VBOP, 0, 3, GL_FLOAT, 0, (void*)0);
+            pCurr->VAOP->LinkAttrib(*pCurr->VBOPT, 1, 2, GL_FLOAT, 0, (void*)0);
+            pCurr->VAOP->LinkAttrib(*pCurr->VBOTH, 2, 2, GL_FLOAT, 0, (void*)0);
 
-            pCurr->m_VAOP->Unbind();
-            pCurr->m_VBOP->Unbind();
-            pCurr->m_VBOPT->Unbind();
+            pCurr->VAOP->Unbind();
+            pCurr->VBOP->Unbind();
+            pCurr->VBOPT->Unbind();
+            pCurr->VBOTH->Unbind();
         }
     }
     
@@ -220,10 +243,6 @@ void CGEOMIPMAP::setupBuffers() {
     // LOD 0 (Full resolution)
     for (int i = 0; i < m_iPatchSize-1; i++) {
         for (int j = 0; j < m_iPatchSize-1; j++) {
-            // int iTopLeft = i * (m_iPatchSize) + j;
-            // int iTopRight = i * (m_iPatchSize) + std::min(j + 1, m_iPatchSize - 1);
-            // int iBottomLeft = std::min(i + 1, m_iPatchSize - 1) * (m_iPatchSize) + j;
-            // int iBottomRight = std::min(i + 1, m_iPatchSize - 1) * (m_iPatchSize) + std::min(j + 1, m_iPatchSize - 1);
             int iTopLeft = i * (m_iPatchSize) + j;
             int iTopRight = i * (m_iPatchSize) + j + 1;
             int iBottomLeft = (i + 1) * (m_iPatchSize) + j;
@@ -244,6 +263,7 @@ void CGEOMIPMAP::setupBuffers() {
     int iSkirtIndexLeft = m_iPatchSize * m_iPatchSize + m_iPatchSize;
     int iSkirtIndexRight = m_iPatchSize * m_iPatchSize + 2*(m_iPatchSize);
     int iSkirtIndexBottom = m_iPatchSize * m_iPatchSize + 3*(m_iPatchSize);
+
     for (int i = 0; i < m_iPatchSize-3; i += 3) {
         for (int j = 0; j < m_iPatchSize-3; j += 3) {
             int iTopLeft = i * m_iPatchSize + j;
@@ -417,10 +437,6 @@ void CGEOMIPMAP::setupGrids(){
             gCurr->s_v2GridTopLeftCoord = glm::vec2(fXTL, fZTL);
             gCurr->s_v2GridBottomRightCoord = glm::vec2(fXBR, fZBR);
 
-            // std::cout << "Grid: " << iz * m_iNumGridPerSide + ix << " and patches: " << iCurrentPatchZ * m_iNumPatchesPerSide + iCurrentPatchX << " " << iCurrentPatchZ * m_iNumPatchesPerSide + iCurrentPatchX+1
-            // << " " << (iCurrentPatchZ+1) * m_iNumPatchesPerSide + iCurrentPatchX << " " << (iCurrentPatchZ+1) * m_iNumPatchesPerSide + iCurrentPatchX+1 << std::endl;
-            // std::cout << "TopLeft Coord: " << fXTL << ", " << fZTL << " and BottomRight Coord: " << fXBR << ", " << fZBR << std::endl;
-
             iCurrentPatchX += 2;
         }
         iCurrentPatchZ += 2;
@@ -458,20 +474,25 @@ CGEOMIPMAP::~CGEOMIPMAP(){
     }
     if (m_pPatches){
         for (int i = 0; i < m_iNumPatchesPerSide * m_iNumPatchesPerSide; i++){
-            if (m_pPatches[i].m_VAOP) {
-                m_pPatches[i].m_VAOP->Delete();
-                delete m_pPatches[i].m_VAOP;
-                m_pPatches[i].m_VAOP = nullptr;
+            if (m_pPatches[i].VAOP) {
+                m_pPatches[i].VAOP->Delete();
+                delete m_pPatches[i].VAOP;
+                m_pPatches[i].VAOP = nullptr;
             }
-            if (m_pPatches[i].m_VBOP) {
-                m_pPatches[i].m_VBOP->Delete();
-                delete m_pPatches[i].m_VBOP;
-                m_pPatches[i].m_VBOP = nullptr;
+            if (m_pPatches[i].VBOP) {
+                m_pPatches[i].VBOP->Delete();
+                delete m_pPatches[i].VBOP;
+                m_pPatches[i].VBOP = nullptr;
             }
-            if (m_pPatches[i].m_VBOPT) {
-                m_pPatches[i].m_VBOPT->Delete();
-                delete m_pPatches[i].m_VBOPT;
-                m_pPatches[i].m_VBOPT = nullptr;
+            if (m_pPatches[i].VBOPT) {
+                m_pPatches[i].VBOPT->Delete();
+                delete m_pPatches[i].VBOPT;
+                m_pPatches[i].VBOPT = nullptr;
+            }
+            if (m_pPatches[i].VBOTH) {
+                m_pPatches[i].VBOTH->Delete();
+                delete m_pPatches[i].VBOTH;
+                m_pPatches[i].VBOTH = nullptr;
             }
         }
         delete[] m_pPatches;

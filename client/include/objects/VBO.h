@@ -8,6 +8,7 @@ class CVBO{
     public:
         GLuint m_ID;
         CVBO(GLfloat* vertices, GLsizeiptr size);
+        CVBO(GLint* vertices, GLsizeiptr size);
         // ~CVBO() {Delete();}
         ~CVBO(){};
         void Bind();

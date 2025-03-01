@@ -16,11 +16,17 @@ Texture::Texture(const char* texturePath, GLenum type, GLenum slot, GLenum forma
 
     glTexParameteri(type, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(type, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(type, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(type, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); // Wrap texture horizontally
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); // Wrap texture vertically
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glTexImage2D(type, 0, GL_RGBA, m_iTextureWidth, m_iTextureHeight, 0, format, pixelType, ucTextureData);
-    glGenerateMipmap(type);
+    GLint internalFormat = (m_iChannels == 4) ? GL_RGBA : GL_RGB;
+    GLenum imageFormat = (m_iChannels == 4) ? GL_RGBA : GL_RGB;
+    glTexImage2D(type, 0, internalFormat, m_iTextureWidth, m_iTextureHeight, 0, imageFormat, pixelType, ucTextureData);
+    // glGenerateMipmap(type);
 
     stbi_image_free(ucTextureData);
     glBindTexture(type, 0);

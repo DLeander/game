@@ -127,9 +127,9 @@ void CCLIENT::init(){
 
     // // Enables the Depth Buffer
 	glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
+    // glFrontFace(GL_CCW);
 
     // Init player shader
     m_camera = new CCAMERA(m_iWindowWidth, m_iWindowHeight, glm::vec3(0.0f, 0.0f, 2.0f));
@@ -137,8 +137,8 @@ void CCLIENT::init(){
     m_player = new CPLAYER(m_playerShader);
 
     // HEIGHTMAP SIZE = (2^n - 1) by (2^n - 1) but inputted heightmap should be 2^n by 2^n, with patch size (2^n - 1) to get correct sized triangles making up terrain. 
-    // m_terrain.init("resources/terrain/RuggedTerrain_512.raw", 512, 0.1f);
-    m_terrain.init("resources/terrain/Rugged_Terrain_Rocky_4096.raw", 4096, 0.1f);
+    m_terrain.init("resources/terrain/RuggedTerrain_512.raw", 512, 0.1f);
+    // m_terrain.init("resources/terrain/Rugged_Terrain_Rocky_4096.raw", 4096, 0.1f);
     // m_terrain.init("resources/terrain/test_black_64.raw", 64, 0.1f);
 
     glfwSetWindowUserPointer(m_window, this);

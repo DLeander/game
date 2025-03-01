@@ -5,7 +5,7 @@ CPLAYER::CPLAYER(CSHADER* shader) {
     m_fSpeed = 0.0001f;
     m_m4Model = glm::mat4(1.0f);
     // m_v3Position = glm::vec3(128.0f, 256.0f, 128.0f);
-    m_v3Position = glm::vec3(10.0f, 00.0f, 10.0f);
+    m_v3Position = glm::vec3(0.0f, 00.0f, 0.0f);
     m_playerShader = shader;
     init();
     m_bInitialised = true;
@@ -244,10 +244,10 @@ void CPLAYER::keyboard_input(GLFWwindow* window, float fDeltaTime) {
     }
 
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
-        m_fSpeed = m_fSpeed + 0.000001f;
+        m_fSpeed = 0.0001f * 20;
     }
     else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_RELEASE){
-        m_fSpeed = m_fSpeed;
+        m_fSpeed = 0.0001f;
     }
 }
 

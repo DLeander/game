@@ -16,15 +16,16 @@ void CTERRAIN::init(const char* filename, int size, float fHeightScale){
     setupShader();
     setupBuffers();
     setupGrids();
-    // Setup the texture
-    createTextureFromHeightMap();
+    setupTexture("resources/terrain/terrain_texture_atlas_grass_dirt_rock_snow_64_by_64.png");
 
+    // Setup the texture
+    // createTextureFromHeightMap();
     // The different x and z directions we can have in slope lightning is
     // 1, 1 (45 degrees), 1, 0 (90 degrees), 1, -1 (135 degrees), 0, -1 (180 degrees), -1, -1 (225 degrees), -1, 0 (270 degrees), -1, 1 (315 degrees), 0, 1 (360 degrees)
     // The sun will always move in 45 degree increments, so the day/night cycle should only recalculate the lightning every "45 degrees" of suntime.
-    setSlopeLightingParams(1, 1, 0.1f, 1.0f, 15.0f);
-    calculateLightning();
-    setupTexture();
+    // setSlopeLightingParams(1, 1, 0.1f, 1.0f, 15.0f);
+    // calculateLightning();
+    // setupTexture();
 
     std::cout << "Terrain initialized" << std::endl;
 }
@@ -58,10 +59,10 @@ bool CTERRAIN::unloadHeightMap(){
     return false;
 }
 
-// void CTERRAIN::setupTexture(const char* filename) {
-//     m_terrainTexture = new Texture(filename, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE);
-//     m_terrainTexture->textureUnit(m_terrainShader, "texture1", 0);
-// }
+void CTERRAIN::setupTexture(const char* filename) {
+    m_terrainTexture = new Texture(filename, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    m_terrainTexture->textureUnit(m_terrainShader, "texture1", 0);
+}
 
 void CTERRAIN::setupTexture() {
     if (m_terrainTexture) {

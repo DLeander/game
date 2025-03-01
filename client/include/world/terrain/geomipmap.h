@@ -17,13 +17,15 @@ public:
     struct SGEOMM_PATCH {
         float m_fDistance; // Distance from the camera
         int m_iLOD;       // Level of detail
-        std::vector<float> m_vVertices; // Vertices
-        std::vector<float> m_vTexCoords; // Texture coordinates
-        CVBO* m_VBOP;       // Vertex Buffer Object
-        CVBO* m_VBOPT;    // Vertex Buffer Object for texture coordinates
-        CVAO* m_VAOP;    // Vertex Array Object
+        std::vector<float> vVertices; // Vertices
+        std::vector<float> vTexCoords; // Texture coordinates
+        std::vector<float> vTexOffsets;
+        CVBO* VBOP;       // Vertex Buffer Object
+        CVBO* VBOPT;    // Vertex Buffer Object for texture coordinates
+        CVBO* VBOTH;    // Vertex Buffer Object for terrain heights.
+        CVAO* VAOP;    // Vertex Array Object
 
-        SGEOMM_PATCH() : m_fDistance(0.0f), m_iLOD(0), m_VBOP(nullptr), m_VBOPT(nullptr), m_VAOP(nullptr) {}
+        SGEOMM_PATCH() : m_fDistance(0.0f), m_iLOD(0), VBOP(nullptr), VBOPT(nullptr), VAOP(nullptr) {}
     };
 
     struct SGEOMM_GRID {
@@ -36,7 +38,7 @@ public:
 
     // Constructor
     CGEOMIPMAP(int iSize, int iNumPatchesPerSide) : m_iNumPatchesPerSide(iNumPatchesPerSide) { m_iSize = iSize; m_pPatches = new SGEOMM_PATCH[iNumPatchesPerSide * iNumPatchesPerSide];}
-    CGEOMIPMAP() { m_iSize = 4096; m_iPatchSize = 64; m_iGridSize = m_iPatchSize*4; m_iNumGridPerSide = m_iSize / (m_iPatchSize * 2); m_Grids = new SGEOMM_GRID[m_iNumGridPerSide * m_iNumGridPerSide]; m_iNumPatchesPerSide = (m_iSize)/(m_iPatchSize); m_pPatches = new SGEOMM_PATCH[m_iNumPatchesPerSide * m_iNumPatchesPerSide];}
+    CGEOMIPMAP() { m_iSize = 512; m_iPatchSize = 64; m_iGridSize = m_iPatchSize*4; m_iNumGridPerSide = m_iSize / (m_iPatchSize * 2); m_Grids = new SGEOMM_GRID[m_iNumGridPerSide * m_iNumGridPerSide]; m_iNumPatchesPerSide = (m_iSize)/(m_iPatchSize); m_pPatches = new SGEOMM_PATCH[m_iNumPatchesPerSide * m_iNumPatchesPerSide];}
     // CGEOMIPMAP(){ m_iSize = 64; m_iPatchSize = 64; m_iGridSize = m_iPatchSize*4; m_iNumGridPerSide = m_iSize/m_iGridSize; m_Grids = new SGEOMM_GRID[m_iNumGridPerSide * m_iNumGridPerSide]; m_iNumPatchesPerSide = (m_iSize)/(m_iPatchSize); m_pPatches = new SGEOMM_PATCH[m_iNumPatchesPerSide * m_iNumPatchesPerSide];}
     // Destructor
     ~CGEOMIPMAP();
